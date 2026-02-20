@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Stages</h1>
-<ul>
+<h1>Etapas del cultivo</h1>
+<div class="grid">
   {% for stage in stages %}
-  <li>
-    <a href="/stages/{{ stage.slug }}">{{ stage.title }}</a>
-    <p>{{ stage.summary }}</p>
-  </li>
+  <article class="card">
+    <h2>{{ stage.order_index }}. {{ stage.name }}</h2>
+    <a class="btn" href="/stages/{{ stage.id }}">Ver detalle</a>
+  </article>
   {% else %}
-  <li>No hay stages todavía.</li>
+  <p>No hay etapas cargadas todavía.</p>
   {% endfor %}
-</ul>
+</div>
 {% endblock %}

@@ -1,24 +1,50 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pydantic import BaseModel, Field
 
 
 class Stage(BaseModel):
     id: int | None = None
-    slug: str
+    name: str
+    order_index: int
+
+
+class TutorialStep(BaseModel):
+    id: int | None = None
+    stage_id: int
     title: str
-    summary: str
-    body_md: str
-    checklist_items: list[str] = Field(default_factory=list)
-    created_at: datetime | None = None
+    content: str
+    tools_json: list[str] = Field(default_factory=list)
+    estimated_cost_usd: float | None = None
 
 
 class Product(BaseModel):
     id: int | None = None
-    sku: str
     name: str
     category: str
     price: float
-    url: str
-    created_at: datetime | None = None
+    affiliate_url: str
+    internal_product: int = 0
+
+
+class Kit(BaseModel):
+    id: int | None = None
+    name: str
+    description: str
+    price: float
+    components_json: list[str] = Field(default_factory=list)
+
+
+class AIStep(BaseModel):
+    title: str
+    objective: str
+    materials: list[str] = Field(default_factory=list)
+    estimated_cost_usd: float = 0
+    instructions: list[str] = Field(default_factory=list)
+    common_mistakes: list[str] = Field(default_factory=list)
+    checklist: list[str] = Field(default_factory=list)
+
+
+class AIStageTutorial(BaseModel):
+    stage_title: str
+    steps: list[AIStep]

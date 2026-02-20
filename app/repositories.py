@@ -2,82 +2,142 @@ from __future__ import annotations
 
 import json
 
-from app.db import fetch_all, fetch_one, get_connection
-from app.models import Product, Stage
+from app.db import get_conn, init_db
+from app.models import Kit, Product, Stage, TutorialStep
 
 
-def _row_to_stage(row) -> Stage:
-    return Stage(
-        id=row["id"],
-        slug=row["slug"],
-        title=row["title"],
-        summary=row["summary"],
-        body_md=row["body_md"],
-        checklist_items=json.loads(row["checklist_items"]),
-        created_at=row["created_at"],
-    )
-
-
-def _row_to_product(row) -> Product:
-    return Product(
-        id=row["id"],
-        sku=row["sku"],
-        name=row["name"],
-        category=row["category"],
-        price=row["price"],
-        url=row["url"],
-        created_at=row["created_at"],
-    )
+def _ensure_ready() -> None:
+    init_db()
 
 
 def list_stages() -> list[Stage]:
-    rows = fetch_all("SELECT * FROM stages ORDER BY created_at DESC")
-    return [_row_to_stage(r) for r in rows]
+    _ensure_ready()
+    with get_conn() as conn:
+        rows = conn.execute("SELECT * FROM stages ORDER BY order_index ASC, id ASC").fetchall()
+    return [Stage(id=row["id"], name=row["name"], order_index=row["order_index"]) for row in rows]
 
 
-def get_stage_by_slug(slug: str) -> Stage | None:
-    row = fetch_one("SELECT * FROM stages WHERE slug = ?", (slug,))
-    return _row_to_stage(row) if row else None
+def get_stage(stage_id: int) -> Stage | None:
+    _ensure_ready()
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM stages WHERE id = ?", (stage_id,)).fetchone()
+    if not row:
+        return None
+    return Stage(id=row["id"], name=row["name"], order_index=row["order_index"])
+
+
+def create_stage(name: str, order_index: int) -> int:
+    _ensure_ready()
+    with get_conn() as conn:
+        cur = conn.execute("INSERT INTO stages(name, order_index) VALUES(?, ?)", (name, order_index))
+        return int(cur.lastrowid)
+
+
+def update_stage(stage_id: int, name: str, order_index: int) -> None:
+    _ensure_ready()
+    with get_conn() as conn:
+        conn.execute("UPDATE stages SET name = ?, order_index = ? WHERE id = ?", (name, order_index, stage_id))
+
+
+def list_steps_by_stage(stage_id: int) -> list[TutorialStep]:
+    _ensure_ready()
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM tutorial_steps WHERE stage_id = ? ORDER BY id ASC", (stage_id,)
+        ).fetchall()
+    return [
+        TutorialStep(
+            id=row["id"],
+            stage_id=row["stage_id"],
+            title=row["title"],
+            content=row["content"],
+            tools_json=json.loads(row["tools_json"] or "[]"),
+            estimated_cost_usd=row["estimated_cost_usd"],
+        )
+        for row in rows
+    ]
+
+
+def create_step(stage_id: int, title: str, content: str, tools: list[str], estimated_cost_usd: float | None) -> int:
+    _ensure_ready()
+    with get_conn() as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd)
+            VALUES(?, ?, ?, ?, ?)
+            """,
+            (stage_id, title, content, json.dumps(tools, ensure_ascii=False), estimated_cost_usd),
+        )
+        return int(cur.lastrowid)
+
+
+def replace_steps(stage_id: int, steps: list[dict]) -> None:
+    _ensure_ready()
+    with get_conn() as conn:
+        conn.execute("DELETE FROM tutorial_steps WHERE stage_id = ?", (stage_id,))
+        for step in steps:
+            conn.execute(
+                """
+                INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    stage_id,
+                    step["title"],
+                    step["content"],
+                    json.dumps(step.get("tools", []), ensure_ascii=False),
+                    step.get("estimated_cost_usd"),
+                ),
+            )
 
 
 def list_products() -> list[Product]:
-    rows = fetch_all("SELECT * FROM products ORDER BY created_at DESC")
-    return [_row_to_product(r) for r in rows]
+    _ensure_ready()
+    with get_conn() as conn:
+        rows = conn.execute("SELECT * FROM products ORDER BY category, name").fetchall()
+    return [
+        Product(
+            id=row["id"],
+            name=row["name"],
+            category=row["category"],
+            price=row["price"],
+            affiliate_url=row["affiliate_url"],
+            internal_product=row["internal_product"],
+        )
+        for row in rows
+    ]
 
 
-def upsert_stage(stage: Stage) -> None:
-    with get_connection() as conn:
+def create_product(product: Product) -> None:
+    _ensure_ready()
+    with get_conn() as conn:
         conn.execute(
-            """
-            INSERT INTO stages (slug, title, summary, body_md, checklist_items)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(slug) DO UPDATE SET
-              title=excluded.title,
-              summary=excluded.summary,
-              body_md=excluded.body_md,
-              checklist_items=excluded.checklist_items
-            """,
-            (
-                stage.slug,
-                stage.title,
-                stage.summary,
-                stage.body_md,
-                json.dumps(stage.checklist_items),
-            ),
+            """INSERT INTO products(name, category, price, affiliate_url, internal_product)
+            VALUES (?, ?, ?, ?, ?)""",
+            (product.name, product.category, product.price, product.affiliate_url, product.internal_product),
         )
 
 
-def upsert_product(product: Product) -> None:
-    with get_connection() as conn:
+def list_kits() -> list[Kit]:
+    _ensure_ready()
+    with get_conn() as conn:
+        rows = conn.execute("SELECT * FROM kits ORDER BY name").fetchall()
+    return [
+        Kit(
+            id=row["id"],
+            name=row["name"],
+            description=row["description"],
+            price=row["price"],
+            components_json=json.loads(row["components_json"] or "[]"),
+        )
+        for row in rows
+    ]
+
+
+def create_kit(kit: Kit) -> None:
+    _ensure_ready()
+    with get_conn() as conn:
         conn.execute(
-            """
-            INSERT INTO products (sku, name, category, price, url)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(sku) DO UPDATE SET
-              name=excluded.name,
-              category=excluded.category,
-              price=excluded.price,
-              url=excluded.url
-            """,
-            (product.sku, product.name, product.category, product.price, product.url),
+            "INSERT INTO kits(name, description, price, components_json) VALUES(?, ?, ?, ?)",
+            (kit.name, kit.description, kit.price, json.dumps(kit.components_json, ensure_ascii=False)),
         )

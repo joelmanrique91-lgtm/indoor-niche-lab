@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Admin Editor</h1>
-<form>
-  <label>Título</label>
-  <input type="text" placeholder="Nuevo stage" />
-  <label>Resumen</label>
-  <textarea rows="3"></textarea>
-  <button type="button">Guardar (UI only)</button>
-</form>
+<h1>Editor simple</h1>
+<section class="card">
+  <h2>Crear o editar etapa</h2>
+  <form method="post" action="/admin/editor/stage" class="stack">
+    <input type="number" name="stage_id" placeholder="ID (opcional para editar)" />
+    <input type="text" name="name" placeholder="Nombre de etapa" required />
+    <input type="number" name="order_index" placeholder="Orden" required />
+    <button class="btn" type="submit">Guardar etapa</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Agregar paso</h2>
+  <form method="post" action="/admin/editor/step" class="stack">
+    <select name="stage_id" required>
+      <option value="">Elegí etapa</option>
+      {% for stage in stages %}
+      <option value="{{ stage.id }}">{{ stage.order_index }}. {{ stage.name }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="title" placeholder="Título del paso" required />
+    <textarea name="content" placeholder="Contenido del paso" required></textarea>
+    <input type="text" name="tools_csv" placeholder="Materiales separados por coma" />
+    <input type="number" step="0.01" name="estimated_cost_usd" placeholder="Costo estimado USD" />
+    <button class="btn" type="submit">Agregar paso</button>
+  </form>
+</section>
+
+{% if selected_stage %}
+<section>
+  <h2>Pasos de: {{ selected_stage.name }}</h2>
+  {% for step in steps %}
+    <article class="card"><h3>{{ step.title }}</h3><p>{{ step.content }}</p></article>
+  {% else %}
+    <p>No hay pasos cargados para esta etapa.</p>
+  {% endfor %}
+</section>
+{% endif %}
 {% endblock %}
