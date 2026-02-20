@@ -1,40 +1,56 @@
-# indoor-niche-lab
+# Indoor Niche Lab
 
-PROYECTO: Indoor Niche Lab — sitio tutorial + base de datos de contenidos + monetización por venta de insumos (indoor).
+MVP educativo + e-commerce básico para cultivo indoor de hongos gourmet (Ostra y Melena de León).
 
 ## Requisitos
-- Python 3.10+
+- Python 3.11+
+- `pip`
 
 ## Setup rápido
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 ```
 
-## Inicializar base de datos
+## Inicializar y poblar base de datos
 ```bash
 python scripts/init_db.py
 python scripts/seed_demo.py
 ```
 
-## Generar tutorial demo adicional
+## Ejecutar servidor
 ```bash
-python scripts/generate_tutorials.py
+uvicorn app.main:app --reload --port 8000
 ```
 
-## Correr servidor
+## Scripts disponibles
 ```bash
-./uvicorn.sh
+python scripts/init_db.py
+python scripts/seed_demo.py
+python scripts/generate_tutorials.py --stage-id 1
 ```
 
-o
+## Uso de Admin
+- Abrí `http://localhost:8000/admin`
+- Botón **Inicializar DB**: crea tablas e índices si no existen.
+- Botón **Cargar demo**: inserta 2 etapas, 6 pasos, 8 productos y 2 kits.
+- Botones **Generar con IA** por etapa: crea pasos con OpenAI y los guarda.
+- En `/admin/editor` podés crear/editar etapas y cargar pasos manuales.
 
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+## Rutas web
+- `/`
+- `/stages`
+- `/stages/{id}`
+- `/products`
+- `/kits`
+- `/admin`
+- `/admin/editor`
 
-## Ejecutar tests
-```bash
-pytest -q
-```
+## Exponer temporalmente con Cloudflare Tunnel
+Ver guía: `deploy/cloudflared/tunnel.md`.
+
+## Notas
+- Si no configurás `OPENAI_API_KEY`, la web funciona igual con datos demo.
+- No subir `.env` con credenciales al repositorio.

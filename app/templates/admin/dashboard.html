@@ -1,6 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Admin Dashboard</h1>
-<p>Vista administrativa inicial (sin autenticación).</p>
-<p><a href="/admin/editor">Ir al editor</a></p>
+<h1>Admin</h1>
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+<div class="actions">
+  <form method="post" action="/admin/init-db"><button class="btn" type="submit">Inicializar DB</button></form>
+  <form method="post" action="/admin/seed-demo"><button class="btn" type="submit">Cargar demo</button></form>
+</div>
+
+<h2>Generar contenido IA por etapa</h2>
+<div class="grid">
+{% for stage in stages %}
+  <form method="post" action="/admin/generate/{{ stage.id }}" class="card">
+    <p><strong>{{ stage.order_index }}. {{ stage.name }}</strong></p>
+    <button class="btn btn-secondary" type="submit">Generar con IA</button>
+  </form>
+{% else %}
+  <p>No hay etapas para generar.</p>
+{% endfor %}
+</div>
+<p><a href="/admin/editor">Ir al editor de etapas y pasos</a></p>
 {% endblock %}

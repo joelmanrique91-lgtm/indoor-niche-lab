@@ -1,12 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>{{ stage.title }}</h1>
-<p>{{ stage.summary }}</p>
-<pre>{{ stage.body_md }}</pre>
-<h3>Checklist</h3>
-<ul>
-  {% for item in stage.checklist_items %}
-  <li>{{ item }}</li>
-  {% endfor %}
-</ul>
+<h1>{{ stage.name }}</h1>
+<p><a href="/stages">← Volver a etapas</a></p>
+
+{% for step in steps %}
+<article class="card">
+  <h2>{{ loop.index }}. {{ step.title }}</h2>
+  <p style="white-space: pre-line;">{{ step.content }}</p>
+  <p><strong>Materiales:</strong></p>
+  <ul>
+    {% for tool in step.tools_json %}
+    <li>{{ tool }}</li>
+    {% endfor %}
+  </ul>
+  <p><strong>Costo estimado:</strong> USD {{ '%.2f'|format(step.estimated_cost_usd or 0) }}</p>
+</article>
+{% else %}
+<p>Esta etapa todavía no tiene pasos cargados.</p>
+{% endfor %}
 {% endblock %}

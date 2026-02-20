@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Kits</h1>
+<div class="grid">
+  {% for kit in kits %}
+  <article class="card">
+    <h2>{{ kit.name }}</h2>
+    <p>{{ kit.description }}</p>
+    <p><strong>Precio:</strong> USD {{ '%.2f'|format(kit.price) }}</p>
+    <p><strong>Componentes:</strong></p>
+    <ul>
+      {% for c in kit.components_json %}
+      <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+  {% else %}
+  <p>No hay kits disponibles.</p>
+  {% endfor %}
+</div>
+{% endblock %}

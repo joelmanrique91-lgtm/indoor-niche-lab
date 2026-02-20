@@ -2,39 +2,56 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import contextmanager
-from typing import Iterable
 
-from app.config import DB_PATH, ensure_data_dir
+from app.config import ensure_dirs, settings
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS stages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    slug TEXT NOT NULL UNIQUE,
-    title TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    body_md TEXT NOT NULL,
-    checklist_items TEXT NOT NULL DEFAULT '[]',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    name TEXT NOT NULL,
+    order_index INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_stages_order_index ON stages(order_index);
+
+CREATE TABLE IF NOT EXISTS tutorial_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stage_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    tools_json TEXT NOT NULL DEFAULT '[]',
+    estimated_cost_usd REAL,
+    FOREIGN KEY(stage_id) REFERENCES stages(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_tutorial_steps_stage_id ON tutorial_steps(stage_id);
 
 CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sku TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     price REAL NOT NULL,
-    url TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    affiliate_url TEXT NOT NULL,
+    internal_product INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+
+CREATE TABLE IF NOT EXISTS kits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    price REAL NOT NULL,
+    components_json TEXT NOT NULL DEFAULT '[]'
 );
 """
 
 
 @contextmanager
-def get_connection(db_path: str | None = None):
-    ensure_data_dir()
-    conn = sqlite3.connect(db_path or DB_PATH)
+def get_conn(db_path: str | None = None):
+    """Entrega conexión SQLite con row_factory por nombre de columnas."""
+    ensure_dirs()
+    conn = sqlite3.connect(db_path or settings.db_path)
     conn.row_factory = sqlite3.Row
     try:
+        conn.execute("PRAGMA foreign_keys = ON")
         yield conn
         conn.commit()
     finally:
@@ -42,22 +59,6 @@ def get_connection(db_path: str | None = None):
 
 
 def init_db(db_path: str | None = None) -> None:
-    with get_connection(db_path) as conn:
+    """Crea esquema si no existe."""
+    with get_conn(db_path) as conn:
         conn.executescript(SCHEMA_SQL)
-
-
-def execute_many(sql: str, rows: Iterable[tuple], db_path: str | None = None) -> None:
-    with get_connection(db_path) as conn:
-        conn.executemany(sql, rows)
-
-
-def fetch_all(sql: str, params: tuple = (), db_path: str | None = None) -> list[sqlite3.Row]:
-    with get_connection(db_path) as conn:
-        cur = conn.execute(sql, params)
-        return cur.fetchall()
-
-
-def fetch_one(sql: str, params: tuple = (), db_path: str | None = None) -> sqlite3.Row | None:
-    with get_connection(db_path) as conn:
-        cur = conn.execute(sql, params)
-        return cur.fetchone()
