@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ stage.title }}</h1>
+<p>{{ stage.summary }}</p>
+<pre>{{ stage.body_md }}</pre>
+<h3>Checklist</h3>
+<ul>
+  {% for item in stage.checklist_items %}
+  <li>{{ item }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

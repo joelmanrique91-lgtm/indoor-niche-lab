@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Products</h1>
+<table>
+  <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th></tr></thead>
+  <tbody>
+  {% for p in products %}
+  <tr>
+    <td>{{ p.sku }}</td>
+    <td><a href="{{ p.url }}">{{ p.name }}</a></td>
+    <td>{{ p.category }}</td>
+    <td>${{ '%.2f'|format(p.price) }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="4">No hay productos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

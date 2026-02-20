@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Stages</h1>
+<ul>
+  {% for stage in stages %}
+  <li>
+    <a href="/stages/{{ stage.slug }}">{{ stage.title }}</a>
+    <p>{{ stage.summary }}</p>
+  </li>
+  {% else %}
+  <li>No hay stages todavía.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
