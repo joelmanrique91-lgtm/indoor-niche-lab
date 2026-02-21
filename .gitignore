@@ -7,3 +7,10 @@ __pycache__/
 # SQLite local
 data/*.db
 *.db
+
+# Generated AI images (runtime/deploy artifacts, never committed)
+app/static/img/generated/**
+!app/static/img/generated/.gitkeep
+app/static/img/generated/**/*.webp
+app/static/img/generated/**/*.png
+app/static/img/generated/**/*.jpg

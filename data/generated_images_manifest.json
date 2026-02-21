@@ -1,0 +1,41 @@
+{
+  "app/templates/home.html": {
+    "/static/img/generated/home-01-persona-cosechando-hongos-gourmet-frescos-en-una-cocina-de-hogar-lg.webp": "/static/img/generated/home-01-persona-cosechando-hongos-gourmet-frescos-en-una-cocina-de-hogar-lg.webp",
+    "/static/img/generated/home-02-kit-de-cultivo-indoor-listo-para-comenzar-sobre-mesa-de-trabajo-lg.webp": "/static/img/generated/home-02-kit-de-cultivo-indoor-listo-para-comenzar-sobre-mesa-de-trabajo-lg.webp",
+    "/static/img/generated/home-03-cosecha-abundante-de-hongos-gourmet-reci-n-cortados-lg.webp": "/static/img/generated/home-03-cosecha-abundante-de-hongos-gourmet-reci-n-cortados-lg.webp",
+    "/static/img/generated/home-04-persona-recibiendo-asesor-a-de-soporte-para-cultivo-por-mensaje-lg.webp": "/static/img/generated/home-04-persona-recibiendo-asesor-a-de-soporte-para-cultivo-por-mensaje-lg.webp",
+    "/static/img/generated/home-05-entrega-de-kit-de-cultivo-listo-para-abrir-en-el-hogar-lg.webp": "/static/img/generated/home-05-entrega-de-kit-de-cultivo-listo-para-abrir-en-el-hogar-lg.webp",
+    "/static/img/generated/home-06-seguimiento-de-checklist-de-cultivo-en-una-gu-a-impresa-lg.webp": "/static/img/generated/home-06-seguimiento-de-checklist-de-cultivo-en-una-gu-a-impresa-lg.webp",
+    "/static/img/generated/home-07-resultado-final-de-hongos-gourmet-cosechados-en-cocina-lg.webp": "/static/img/generated/home-07-resultado-final-de-hongos-gourmet-cosechados-en-cocina-lg.webp",
+    "/static/img/generated/home-08-foto-de-andrea-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-08-foto-de-andrea-cliente-de-indoor-niche-lab-lg.webp",
+    "/static/img/generated/home-09-foto-de-mart-n-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-09-foto-de-mart-n-cliente-de-indoor-niche-lab-lg.webp",
+    "/static/img/generated/home-10-foto-de-luc-a-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-10-foto-de-luc-a-cliente-de-indoor-niche-lab-lg.webp"
+  },
+  "app/templates/kit_list.html": {
+    "/static/img/generated/kit_list-01-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp": "/static/img/generated/kit_list-01-precio-usd-componentes-no-hay-kits-disponibles-lg.webp",
+    "/static/img/generated/kit_list-02-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp": "/static/img/generated/kit_list-02-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp",
+    "/static/img/generated/kit_list-03-resultado-final-de-cosecha-del-kit-name-lg.webp": "/static/img/generated/kit_list-03-resultado-final-de-cosecha-del-kit-name-lg.webp",
+    "/static/img/generated/kit_list-04-resultado-final-de-cosecha-del-kit-name-lg.webp": "/static/img/generated/kit_list-04-resultado-final-de-cosecha-del-kit-name-lg.webp"
+  },
+  "app/templates/product_list.html": {
+    "/static/img/generated/product_list-01-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-01-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
+    "/static/img/generated/product_list-02-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-02-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
+    "/static/img/generated/product_list-03-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-03-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
+    "/static/img/generated/product_list-04-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-04-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
+    "/static/img/generated/product_list-05-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-05-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp"
+  },
+  "app/templates/stage_detail.html": {
+    "/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp": "/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp",
+    "/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp": "/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp",
+    "/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp": "/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp",
+    "/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp",
+    "/static/img/generated/stage_detail-05-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-05-miniatura-del-proceso-step-title-lg.webp",
+    "/static/img/generated/stage_detail-06-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-06-miniatura-del-proceso-step-title-lg.webp",
+    "/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp"
+  },
+  "app/templates/stage_list.html": {
+    "/static/img/generated/stage_list-01-section-lg.webp": "/static/img/generated/stage_list-01-imagen-representativa-de-la-etapa-stage-name-lg.webp",
+    "/static/img/generated/stage_list-02-imagen-representativa-de-la-etapa-stage-name-lg.webp": "/static/img/generated/stage_list-02-imagen-representativa-de-la-etapa-stage-name-lg.webp",
+    "/static/img/generated/stage_list-03-section-lg.webp": "/static/img/generated/stage_list-03-imagen-representativa-de-la-etapa-stage-name-lg.webp"
+  }
+}
