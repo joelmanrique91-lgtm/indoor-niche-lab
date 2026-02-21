@@ -3,8 +3,20 @@
 <h1>Etapas del cultivo</h1>
 <div class="grid">
   {% for stage in stages %}
-  <article class="card">
-    <h2>{{ stage.order_index }}. {{ stage.name }}</h2>
+  <article class="card stage-item-card">
+    <div class="stage-item-head">
+      <img
+        class="stage-icon-image"
+        src="{{ [
+          'https://images.unsplash.com/photo-1524593119773-16f0d7b4f8d2?auto=format&fit=crop&w=220&q=70',
+          'https://images.unsplash.com/photo-1599058918144-1ffabb6ab9a0?auto=format&fit=crop&w=220&q=70',
+          'https://images.unsplash.com/photo-1615486363978-5f8b4f4b95d1?auto=format&fit=crop&w=220&q=70'
+        ][loop.index0 % 3] }}"
+        alt="Imagen representativa de la etapa {{ stage.name }}"
+        loading="lazy"
+      >
+      <h2>{{ stage.order_index }}. {{ stage.name }}</h2>
+    </div>
     <a class="btn" href="/stages/{{ stage.id }}">Ver detalle</a>
   </article>
   {% else %}
