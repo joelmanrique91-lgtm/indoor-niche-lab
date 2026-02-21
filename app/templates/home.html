@@ -1,13 +1,166 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="hero">
-  <h1>Cultivo indoor de hongos gourmet</h1>
-  <p>Aprendé paso a paso cómo producir Ostra y Melena de León en casa, con recursos simples y kits recomendados.</p>
-  <div class="actions">
-    <a class="btn" href="/stages">Ver etapas</a>
-    <a class="btn" href="/products">Productos</a>
-    <a class="btn" href="/kits">Kits</a>
-    <a class="btn btn-secondary" href="/admin">Admin</a>
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-content">
+    <span class="hero-logo">🍄 Indoor Niche Lab</span>
+    <h1 id="hero-title">Produce tus propios hongos gourmet en casa: fácil, seguro y rentable.</h1>
+    <p class="subheadline">Sin experiencia previa. Con guías paso a paso y kits listos para comenzar.</p>
+    <div class="actions hero-actions">
+      <a class="btn btn-cta" href="/kits">Comprar Kit Ahora</a>
+      <a class="btn btn-secondary" href="/stages">Comenzá tu cultivo hoy</a>
+    </div>
+    <div class="quick-links">
+      <a href="/products">Ver productos</a>
+      <a href="/admin">Acceso admin</a>
+    </div>
+  </div>
+  <div class="hero-visual" role="img" aria-label="Espacio para imagen de cultivo indoor de hongos">
+    <span>Imagen del kit y cultivo (placeholder)</span>
   </div>
 </section>
+
+<section id="beneficios" class="section">
+  <div class="section-head">
+    <p class="eyebrow">Beneficios</p>
+    <h2>Todo lo que necesitás para empezar sin complicaciones</h2>
+  </div>
+  <div class="benefits-grid">
+    <article class="benefit-card">
+      <div class="icon">🧩</div>
+      <h3>Fácil de usar</h3>
+      <p>Sistema diseñado para principiantes.</p>
+    </article>
+    <article class="benefit-card">
+      <div class="icon">📈</div>
+      <h3>Resultados garantizados</h3>
+      <p>Protocolos optimizados para alto rendimiento.</p>
+    </article>
+    <article class="benefit-card">
+      <div class="icon">🤝</div>
+      <h3>Soporte incluido</h3>
+      <p>Acompañamiento y guía técnica.</p>
+    </article>
+  </div>
+  <a class="btn btn-secondary section-cta" href="/kits">Quiero mi kit ahora</a>
+</section>
+
+<section id="como-funciona" class="section">
+  <div class="section-head">
+    <p class="eyebrow">Cómo funciona</p>
+    <h2>Un proceso guiado en 3 pasos</h2>
+  </div>
+  <div class="steps-grid">
+    <article class="step-card"><span>1</span><h3>Recibís tu kit</h3><p>Te enviamos todo listo para empezar en casa.</p></article>
+    <article class="step-card"><span>2</span><h3>Seguís la guía paso a paso</h3><p>Instrucciones simples para cada etapa del cultivo.</p></article>
+    <article class="step-card"><span>3</span><h3>Cosechás tus propios hongos gourmet</h3><p>Disfrutá tu primera producción y repetí cuando quieras.</p></article>
+  </div>
+  <div class="desire-strip">
+    <p><strong>Ahorro:</strong> reducís costos comprando menos producto externo.</p>
+    <p><strong>Independencia:</strong> producís en tus tiempos y a tu ritmo.</p>
+    <p><strong>Producción en casa:</strong> control total del proceso en tu espacio.</p>
+    <p><strong>Satisfacción personal:</strong> disfrutás de cosechar algo propio.</p>
+  </div>
+  <a class="btn btn-secondary section-cta" href="/kits">Comenzá tu cultivo hoy</a>
+</section>
+
+<section id="testimonios" class="section">
+  <div class="section-head">
+    <p class="eyebrow">Prueba social</p>
+    <h2>Historias reales de alumnos y cultivadores</h2>
+  </div>
+  <div class="testimonials-grid">
+    <article class="testimonial-card">
+      <div class="avatar" aria-hidden="true">M</div>
+      <p class="stars" aria-label="5 estrellas">★★★★★</p>
+      <p>“En 30 días estaba cosechando. Súper claro y fácil.”</p>
+      <strong>— Martín, Buenos Aires</strong>
+    </article>
+    <article class="testimonial-card">
+      <div class="avatar" aria-hidden="true">L</div>
+      <p class="stars" aria-label="5 estrellas">★★★★★</p>
+      <p>“Pensé que era difícil, pero el kit me simplificó todo.”</p>
+      <strong>— Lucía, Córdoba</strong>
+    </article>
+    <article class="testimonial-card">
+      <div class="avatar" aria-hidden="true">F</div>
+      <p class="stars" aria-label="5 estrellas">★★★★★</p>
+      <p>“Ideal para emprender desde casa y tener ingresos extra.”</p>
+      <strong>— Franco, Rosario</strong>
+    </article>
+  </div>
+  <a class="btn btn-secondary section-cta" href="/kits">Quiero mi kit ahora</a>
+</section>
+
+<section id="productos" class="section">
+  <div class="section-head">
+    <p class="eyebrow">Productos destacados</p>
+    <h2>Elegí el kit ideal para tu nivel</h2>
+  </div>
+  <div class="product-grid">
+    <article class="product-card">
+      <div class="product-image">Imagen producto</div>
+      <h3>Kit Inicio Ostra</h3>
+      <p class="price">$39.900</p>
+      <a class="btn btn-product" href="/products">Agregar al carrito</a>
+    </article>
+    <article class="product-card">
+      <div class="product-image">Imagen producto</div>
+      <h3>Kit Melena Pro</h3>
+      <p class="price">$54.900</p>
+      <a class="btn btn-product" href="/products">Agregar al carrito</a>
+    </article>
+    <article class="product-card">
+      <div class="product-image">Imagen producto</div>
+      <h3>Pack Reposición</h3>
+      <p class="price">$24.900</p>
+      <a class="btn btn-product" href="/products">Agregar al carrito</a>
+    </article>
+  </div>
+</section>
+
+<section id="faq" class="section">
+  <div class="section-head">
+    <p class="eyebrow">FAQ</p>
+    <h2>Respuestas rápidas antes de empezar</h2>
+  </div>
+  <div class="faq-list">
+    <details>
+      <summary>¿Necesito experiencia previa?</summary>
+      <p>No. El sistema está pensado para que cualquier persona pueda comenzar de cero.</p>
+    </details>
+    <details>
+      <summary>¿Cuánto tarda la primera cosecha?</summary>
+      <p>Dependiendo de la variedad y condiciones, podés ver resultados entre 20 y 35 días.</p>
+    </details>
+    <details>
+      <summary>¿Qué incluye el kit?</summary>
+      <p>Incluye insumos esenciales, guía práctica y recomendaciones para acompañar cada etapa.</p>
+    </details>
+    <details>
+      <summary>¿Hay garantía?</summary>
+      <p>Sí, tenés respaldo y soporte para resolver dudas durante el proceso.</p>
+    </details>
+  </div>
+  <p class="guarantee">Garantía de satisfacción 30 días.</p>
+</section>
+
+<section id="cta-final" class="final-cta">
+  <h2>Comenzá hoy mismo tu producción indoor.</h2>
+  <a class="btn btn-cta" href="/kits">Comprar Kit Ahora</a>
+</section>
+
+<footer class="landing-footer">
+  <div>
+    <p class="footer-logo">🍄 Indoor Niche Lab</p>
+    <p>Email: <a href="mailto:contacto@indoornichelab.com">contacto@indoornichelab.com</a></p>
+  </div>
+  <div class="footer-links">
+    <a href="#">Términos</a>
+    <a href="#">Privacidad</a>
+    <a href="#">Contacto</a>
+    <a href="#">Instagram</a>
+    <a href="#">YouTube</a>
+  </div>
+  <p class="copyright">© <span id="current-year"></span> Indoor Niche Lab</p>
+</footer>
 {% endblock %}
