@@ -5,7 +5,7 @@ Indoor Niche Lab es un MVP educativo + catálogo básico para cultivo indoor de 
 ## Windows 11 (camino recomendado, único)
 
 ### Prerrequisitos
-- Python **3.11**
+- Python Launcher (`py`) con Python 3.12 o 3.11 (preferido 3.12)
 - Git
 - VS Code
 
@@ -13,7 +13,7 @@ Indoor Niche Lab es un MVP educativo + catálogo básico para cultivo indoor de 
 ```powershell
 git clone <REPO_URL>
 cd indoor-niche-lab
-powershell -ExecutionPolicy Bypass -File scripts\run_local.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\run_local.ps1
 ```
 
 Ese comando:
@@ -56,7 +56,7 @@ También podés abrir:
 
 ---
 
-## Alternativa corta para levantar servidor
+## Fallback corto para levantar servidor
 Si ya hiciste setup:
 ```powershell
 .\uvicorn.cmd
