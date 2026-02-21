@@ -80,6 +80,35 @@ Si `OPENAI_API_KEY` no está configurada, el script termina con error controlado
 
 ---
 
+
+# Pipeline de imágenes IA (auto extracción + reemplazo)
+```powershell
+# modo real (requiere OPENAI_API_KEY)
+python scripts\generate_site_images.py --size 1536x1024 --quality high
+
+# modo local de prueba (sin API externa)
+python scripts\generate_site_images.py --mock
+```
+
+El script:
+1. extrae contexto semántico por sección desde `app/templates/*.html`,
+2. construye prompts estandarizados con estilo visual único,
+3. genera imágenes (OpenAI `gpt-image-1` o mock local),
+4. optimiza variantes responsivas WebP (`sm`, `md`, `lg`) en `app/static/img/generated`,
+5. reemplaza automáticamente URLs anteriores en templates por rutas estables `/static/img/generated/...`,
+6. guarda trazabilidad en `data/generated_images_manifest.json`.
+
+> Importante: las imágenes generadas **no se commitean**. Se generan localmente o durante deploy/arranque del entorno.
+
+Workflow mínimo recomendado:
+```powershell
+# 1) generar/actualizar imágenes
+python scripts\generate_site_images.py --size 1536x1024 --quality high
+
+# 2) ejecutar app
+.\uvicorn.cmd
+```
+
 ## Scripts principales
 ```powershell
 # Inicializar esquema

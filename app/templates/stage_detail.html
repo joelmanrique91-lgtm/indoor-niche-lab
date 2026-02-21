@@ -2,11 +2,11 @@
 {% block content %}
 <h1>{{ stage.name }}</h1>
 {% if stage.id == 13 %}
-<img class="stage-banner" src="https://images.unsplash.com/photo-1621911762451-4f812f0f4a95?auto=format&fit=crop&w=1500&q=70" alt="Proceso real de hidratación y pasteurización del sustrato" loading="lazy">
+<img class="stage-banner" src="/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp" alt="Proceso real de hidratación y pasteurización del sustrato" loading="lazy">
 {% elif stage.id == 14 %}
-<img class="stage-banner" src="https://images.unsplash.com/photo-1611255279432-22f2a9fb2608?auto=format&fit=crop&w=1500&q=70" alt="Incubación del cultivo en ambiente controlado" loading="lazy">
+<img class="stage-banner" src="/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp" alt="Incubación del cultivo en ambiente controlado" loading="lazy">
 {% else %}
-<img class="stage-banner" src="https://images.unsplash.com/photo-1457530378978-8bac673b8062?auto=format&fit=crop&w=1500&q=70" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
+<img class="stage-banner" src="/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
 {% endif %}
 <p><a href="/stages">← Volver a etapas</a></p>
 
@@ -15,10 +15,10 @@
   <img
     class="stage-step-image"
     src="{{ [
-      'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=420&q=70',
-      'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=420&q=70',
-      'https://images.unsplash.com/photo-1603048719539-9ecb5e3cdd1e?auto=format&fit=crop&w=420&q=70',
-      'https://images.unsplash.com/photo-1471194402529-8e0f5a675de6?auto=format&fit=crop&w=420&q=70'
+      '/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp',
+      '/static/img/generated/stage_detail-05-miniatura-del-proceso-step-title-lg.webp',
+      '/static/img/generated/stage_detail-06-miniatura-del-proceso-step-title-lg.webp',
+      '/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp'
     ][loop.index0 % 4] }}"
     alt="Miniatura del proceso: {{ step.title }}"
     loading="lazy"
