@@ -3,7 +3,16 @@
 <h1>Kits</h1>
 <div class="grid">
   {% for kit in kits %}
-  <article class="card">
+  <article class="card kit-card">
+    <img
+      class="kit-hero-image"
+      src="{{ [
+        'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=70',
+        'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=70'
+      ][loop.index0 % 2] }}"
+      alt="Kit completo {{ kit.name }} en entorno real con iluminación natural"
+      loading="lazy"
+    >
     <h2>{{ kit.name }}</h2>
     <p>{{ kit.description }}</p>
     <p><strong>Precio:</strong> USD {{ '%.2f'|format(kit.price) }}</p>
@@ -13,6 +22,15 @@
       <li>{{ c }}</li>
       {% endfor %}
     </ul>
+    <img
+      class="kit-harvest-image"
+      src="{{ [
+        'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1000&q=70',
+        'https://images.unsplash.com/photo-1463123081488-789f998ac9c4?auto=format&fit=crop&w=1000&q=70'
+      ][loop.index0 % 2] }}"
+      alt="Resultado final de cosecha del {{ kit.name }}"
+      loading="lazy"
+    >
   </article>
   {% else %}
   <p>No hay kits disponibles.</p>
