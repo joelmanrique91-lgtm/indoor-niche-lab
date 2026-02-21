@@ -111,6 +111,28 @@ python scripts\smoke_test.py
 pytest
 ```
 
+## Diagnóstico OpenAI
+Ejecutá un check runtime real (sin tocar DB ni levantar servidor):
+
+**Windows PowerShell**
+```powershell
+python scripts\check_openai.py
+```
+
+**Linux/Mac**
+```bash
+python scripts/check_openai.py
+```
+
+El script usa `OPENAI_MODEL` si está seteado. Si está vacío, aplica `gpt-4o-mini` por defecto y lo informa por consola.
+
+Códigos de salida:
+- `0`: PASS (OpenAI conectado y respondiendo)
+- `2`: falta `OPENAI_API_KEY`
+- `3`: error de autenticación/credenciales
+- `4`: error de red/timeout/DNS
+- `5`: modelo inválido/no disponible
+
 ## Outputs y persistencia
 - DB SQLite: `data/indoor.db` (o la ruta que definas en `DB_PATH`).
 - Contenido generado (manual o IA): se guarda en tablas `stages` y `tutorial_steps`.
