@@ -21,7 +21,11 @@ def main() -> None:
     if not stage:
         raise SystemExit(f"No existe la etapa con id {args.stage_id}")
 
-    tutorial = generate_stage_tutorial(stage.name)
+    try:
+        tutorial = generate_stage_tutorial(stage.name)
+    except Exception as exc:
+        print(f"❌ No se pudo generar contenido IA: {exc}")
+        raise SystemExit(2)
     payload = []
     for step in tutorial.steps:
         text = (
