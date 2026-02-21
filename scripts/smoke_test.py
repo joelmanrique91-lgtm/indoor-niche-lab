@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-import time
 from pathlib import Path
-from urllib.error import URLError
-from urllib.request import urlopen
+
+from dotenv import load_dotenv
+from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[1]
-ENV_FILE = ROOT / ".env"
+sys.path.append(str(ROOT))
 
 
 def _print(msg: str) -> None:
@@ -17,13 +17,10 @@ def _print(msg: str) -> None:
 
 
 def _ensure_env() -> None:
-    if not ENV_FILE.exists():
+    env_file = ROOT / ".env"
+    if not env_file.exists():
         raise SystemExit("Falta .env. Copiá .env.example a .env antes de correr smoke_test.")
-
-    required = ["APP_TITLE", "DB_PATH", "OPENAI_MODEL"]
-    missing = [name for name in required if not os.getenv(name)]
-    if missing:
-        _print(f"Aviso: variables no seteadas explícitamente (se usarán defaults): {', '.join(missing)}")
+    load_dotenv(env_file)
 
 
 def _run_script(script_name: str) -> None:
@@ -32,51 +29,37 @@ def _run_script(script_name: str) -> None:
     subprocess.run([sys.executable, str(script_path)], check=True, cwd=ROOT)
 
 
-def _wait_for_health(url: str, timeout_s: int = 20) -> int:
-    started = time.time()
-    while time.time() - started < timeout_s:
-        try:
-            with urlopen(url, timeout=2) as response:  # nosec B310 (localhost only)
-                return response.status
-        except URLError:
-            time.sleep(0.5)
-    raise TimeoutError(f"Timeout esperando respuesta de {url}")
+def _ensure_db() -> None:
+    db_path = ROOT / Path(os.getenv("DB_PATH", "data/indoor.db"))
+    if not db_path.exists():
+        _print(f"DB no encontrada en {db_path}. Ejecutando init + seed...")
+        _run_script("init_db.py")
+        _run_script("seed_demo.py")
+    elif db_path.stat().st_size == 0:
+        _print("DB vacía detectada. Ejecutando init + seed...")
+        _run_script("init_db.py")
+        _run_script("seed_demo.py")
 
 
-def _check_http_health() -> None:
-    port = int(os.getenv("SMOKE_TEST_PORT", "8011"))
-    cmd = [
-        sys.executable,
-        "-m",
-        "uvicorn",
-        "app.main:app",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        str(port),
-    ]
-    _print("Levantando servidor uvicorn temporal")
-    proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    try:
-        status = _wait_for_health(f"http://127.0.0.1:{port}/health")
-    finally:
-        proc.terminate()
-        proc.wait(timeout=10)
+def _check_http_health_with_testclient() -> None:
+    from app.main import app
 
-    if status != 200:
-        raise SystemExit(f"Health check devolvió status inesperado: {status}")
+    client = TestClient(app)
+    health = client.get("/health")
+    if health.status_code != 200 or health.json() != {"ok": True}:
+        raise SystemExit(f"/health inesperado: status={health.status_code} body={health.text}")
+
+    api_health = client.get("/api/health")
+    if api_health.status_code != 200 or api_health.json() != {"ok": True}:
+        raise SystemExit(f"/api/health inesperado: status={api_health.status_code} body={api_health.text}")
 
 
 def main() -> None:
     _ensure_env()
     _run_script("init_db.py")
     _run_script("seed_demo.py")
-
-    db_path = Path(os.getenv("DB_PATH", "data/indoor.db"))
-    if not db_path.exists():
-        raise SystemExit(f"La DB no fue creada en {db_path}")
-
-    _check_http_health()
+    _ensure_db()
+    _check_http_health_with_testclient()
     print("OK")
 
 
