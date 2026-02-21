@@ -1,0 +1,37 @@
+[
+  {
+    "slug": "hero",
+    "selector": "section#hero",
+    "title": "Cultivá hongos gourmet en casa y lográ tu primera cosecha en 20–35 días.",
+    "description": "Recibís un kit listo para usar, una guía paso a paso y soporte humano para que empieces con seguridad desde el primer día. Sin experiencia previa ni compras extra.",
+    "section_type": "hero"
+  },
+  {
+    "slug": "beneficios",
+    "selector": "section#beneficios",
+    "title": "Un sistema simple para lograr resultados reales",
+    "description": "Beneficios Cada kit está pensado para reducir errores y darte claridad en cada etapa.",
+    "section_type": "beneficios"
+  },
+  {
+    "slug": "como-funciona",
+    "selector": "section#como-funciona",
+    "title": "Tu primera cosecha en 3 pasos claros",
+    "description": "Cómo funciona Un flujo simple para que pases de principiante a cosecha sin fricciones.",
+    "section_type": "proceso"
+  },
+  {
+    "slug": "testimonios",
+    "selector": "section#testimonios",
+    "title": "Testimonios reales de alumnos y clientes",
+    "description": "Prueba social Resultados concretos de personas que empezaron desde cero.",
+    "section_type": "testimonios"
+  },
+  {
+    "slug": "faq",
+    "selector": "section#faq",
+    "title": "Todo lo que necesitás para decidir hoy",
+    "description": "Preguntas frecuentes Respuestas breves para que avances con seguridad.",
+    "section_type": "faq"
+  }
+]

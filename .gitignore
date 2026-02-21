@@ -14,3 +14,7 @@ app/static/img/generated/**
 app/static/img/generated/**/*.webp
 app/static/img/generated/**/*.png
 app/static/img/generated/**/*.jpg
+# Generated section images (runtime artifacts)
+app/static/section-images/**/*.png
+!app/static/section-images/.gitkeep
+

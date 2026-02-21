@@ -109,6 +109,24 @@ python scripts\generate_site_images.py --size 1536x1024 --quality high
 .\uvicorn.cmd
 ```
 
+
+## Generar imágenes por sección
+Comando único (modo completo):
+```bash
+python scripts/generate_section_images.py --url "https://perception-mai-configure-pee.trycloudflare.com/" --out "app/static/section-images" --v 1
+```
+
+Opcional para auditoría sin consumir API:
+```bash
+python scripts/generate_section_images.py --url "https://perception-mai-configure-pee.trycloudflare.com/" --out "app/static/section-images" --v 1 --scan-only
+```
+
+Salidas:
+- `outputs/section_images/sections.json` (inventario de secciones detectadas)
+- `outputs/section_images/manifest.json` (prompts, archivos y cambios de integración)
+
+Si falta `OPENAI_API_KEY`, el script falla con mensaje claro y no afecta el funcionamiento normal de la app.
+
 ## Scripts principales
 ```powershell
 # Inicializar esquema
