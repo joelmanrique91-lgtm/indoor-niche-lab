@@ -27,6 +27,14 @@ HOME_SLOTS = [
 ]
 
 
+def _assert_asset_exists(section: str, slot: str, size: str, entity_label: str) -> None:
+    expected = ROOT / "app" / "static" / "img" / "generated" / section / slot / f"{size}.webp"
+    if not expected.exists():
+        raise SystemExit(f"Asset faltante en disco: section={section} slot={slot} size={size} entity={entity_label} path={expected}")
+    if expected.stat().st_size <= 0:
+        raise SystemExit(f"Asset vacío en disco: section={section} slot={slot} size={size} entity={entity_label} path={expected}")
+
+
 def _public_to_file(public_url: str) -> Path:
     if not public_url.startswith("/static/"):
         raise ValueError(f"Ruta no estática: {public_url}")
@@ -113,6 +121,8 @@ def _check_stage_product_coverage() -> None:
 
     for stage in list_stages():
         slot = entity_slot("stage", stage.id, stage.name)
+        _assert_asset_exists("stages", slot, "md", f"stage:{stage.id}")
+        _assert_asset_exists("stages", slot, "lg", f"stage:{stage.id}")
         resolved_md = resolve_static_path("stages", slot, "md")
         resolved_lg = resolve_static_path("stages", slot, "lg")
         if resolved_md == PLACEHOLDER_STATIC_PATH:
@@ -122,6 +132,7 @@ def _check_stage_product_coverage() -> None:
 
     for product in list_products():
         slot = entity_slot("product", product.id, product.name)
+        _assert_asset_exists("products", slot, "md", f"product:{product.id}")
         resolved = resolve_static_path("products", slot, "md")
         if resolved == PLACEHOLDER_STATIC_PATH:
             missing.append(f"section=products slot={slot} size=md entity=product:{product.id}")
@@ -129,6 +140,8 @@ def _check_stage_product_coverage() -> None:
     for kit in list_kits():
         slot = entity_slot("kit", kit.id, kit.name)
         result_slot = entity_slot("kit-result", kit.id, kit.name)
+        _assert_asset_exists("kits", slot, "md", f"kit:{kit.id}")
+        _assert_asset_exists("kits", result_slot, "md", f"kit-result:{kit.id}")
         resolved_kit = resolve_static_path("kits", slot, "md")
         resolved_result = resolve_static_path("kits", result_slot, "md")
         if resolved_kit == PLACEHOLDER_STATIC_PATH:

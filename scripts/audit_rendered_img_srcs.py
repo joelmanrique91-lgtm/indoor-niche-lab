@@ -34,19 +34,33 @@ class ImgCheck:
     content_type: str
     byte_size: int
     placeholder: bool
+    context: str
+
+
+@dataclass
+class ImgRef:
+    src: str
+    context: str
 
 
 class ImgSrcParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
-        self.sources: list[str] = []
+        self.sources: list[ImgRef] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag.lower() != "img":
             return
-        for key, value in attrs:
-            if key.lower() == "src" and value:
-                self.sources.append(value.strip())
+        attr_map = {k.lower(): (v or "").strip() for k, v in attrs}
+        src = attr_map.get("src", "")
+        if not src:
+            return
+        context_parts: list[str] = []
+        for key in ("id", "class", "alt", "data-entity-id", "data-slot", "data-size"):
+            value = attr_map.get(key, "")
+            if value:
+                context_parts.append(f"{key}={value}")
+        self.sources.append(ImgRef(src=src, context=", ".join(context_parts) if context_parts else "n/a"))
 
 
 def _wait_for_health(base_url: str, timeout_s: float = 20.0) -> None:
@@ -72,7 +86,7 @@ def _build_paths() -> list[str]:
     return paths
 
 
-def _extract_img_srcs(html: str) -> list[str]:
+def _extract_img_srcs(html: str) -> list[ImgRef]:
     parser = ImgSrcParser()
     parser.feed(html)
     return parser.sources
@@ -155,11 +169,12 @@ def main() -> None:
 
             img_srcs = _extract_img_srcs(response.text)
             page_checks: list[ImgCheck] = []
-            for src in img_srcs:
+            for img in img_srcs:
+                src = img.src
                 absolute = _normalize_src(base_url, src)
                 if absolute.startswith("data:"):
                     page_checks.append(
-                        ImgCheck(path, src, absolute, 200, "image/data-uri", len(absolute), False)
+                        ImgCheck(path, src, absolute, 200, "image/data-uri", len(absolute), False, img.context)
                     )
                     continue
                 status, ctype, byte_size = _head_or_get(absolute)
@@ -172,6 +187,7 @@ def main() -> None:
                         content_type=ctype,
                         byte_size=byte_size,
                         placeholder=_is_placeholder_src(absolute),
+                        context=img.context,
                     )
                 )
 
@@ -211,7 +227,7 @@ def main() -> None:
         if placeholders:
             print("\n[INFO] Src apuntando a placeholder.svg:")
             for item in placeholders:
-                print(f" - page={item.page} src={item.raw_src}")
+                print(f" - page={item.page} src={item.raw_src} context={item.context}")
 
         if broken:
             errors.append(f"Se detectaron {len(broken)} imágenes con status >= 400.")
