@@ -3,20 +3,44 @@
 <h1>Admin</h1>
 {% if message %}<p class="notice">{{ message }}</p>{% endif %}
 <div class="actions">
-  <form method="post" action="/admin/init-db"><button class="btn" type="submit">Inicializar DB</button></form>
-  <form method="post" action="/admin/seed-demo"><button class="btn" type="submit">Cargar demo</button></form>
+  <form method="post" action="/admin/init-db" class="async-action-form">
+    <button class="btn icon-btn" type="submit">
+      <img src="/static/assets/icons/database.svg" alt="" width="20" height="20" />
+      <span>Inicializar DB</span>
+    </button>
+    <span class="action-status" aria-live="polite"></span>
+  </form>
+  <form method="post" action="/admin/seed-demo" class="async-action-form">
+    <button class="btn icon-btn" type="submit">
+      <img src="/static/assets/icons/upload.svg" alt="" width="20" height="20" />
+      <span>Cargar demo</span>
+    </button>
+    <span class="action-status" aria-live="polite"></span>
+  </form>
 </div>
 
 <h2>Generar contenido IA por etapa</h2>
-<div class="grid">
+<div class="grid admin-stage-grid">
 {% for stage in stages %}
-  <form method="post" action="/admin/generate/{{ stage.id }}" class="card">
-    <p><strong>{{ stage.order_index }}. {{ stage.name }}</strong></p>
-    <button class="btn btn-secondary" type="submit">Generar con IA</button>
+  <form method="post" action="/admin/generate/{{ stage.id }}" class="card stage-generate-card async-action-form">
+    <img class="stage-thumb" src="{{ stage_illustration(stage.name) }}" alt="Ilustración de la etapa {{ stage.name }}" width="48" height="48" />
+    <div>
+      <p><strong>{{ stage.order_index }}. {{ stage.name }}</strong></p>
+      <button class="btn btn-secondary icon-btn" type="submit">
+        <img src="/static/assets/icons/ai.svg" alt="" width="20" height="20" />
+        <span>Generar con IA</span>
+      </button>
+      <span class="action-status" aria-live="polite"></span>
+    </div>
   </form>
 {% else %}
   <p>No hay etapas para generar.</p>
 {% endfor %}
 </div>
-<p><a href="/admin/editor">Ir al editor de etapas y pasos</a></p>
+<p>
+  <a href="/admin/editor" class="admin-editor-link">
+    <img src="/static/assets/icons/edit.svg" alt="" width="20" height="20" />
+    <span>Ir al editor de etapas y pasos</span>
+  </a>
+</p>
 {% endblock %}
