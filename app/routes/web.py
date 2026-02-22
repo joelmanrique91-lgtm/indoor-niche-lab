@@ -7,7 +7,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from app.repositories import get_stage, list_kits, list_products, list_stages, list_steps_by_stage
-from app.services.image_resolver import entity_slot, resolve_static_path
+from app.services.image_resolver import (
+    entity_slot,
+    kit_card_image,
+    kit_result_image,
+    resolve_static_path,
+    stage_hero_image,
+    stage_list_images,
+    step_image,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -43,8 +51,7 @@ def stages(request: Request):
                 "id": stage.id,
                 "name": stage.name,
                 "order_index": stage.order_index,
-                "slot": entity_slot("stage", stage.id, stage.name),
-                "image_path": resolve_static_path("stages", entity_slot("stage", stage.id, stage.name), "md"),
+                "images": stage_list_images(stage),
             }
         )
     return templates.TemplateResponse("stage_list.html", {"request": request, "stages": stage_rows, "hero_path": resolve_static_path("stages", "hero", "md")})
@@ -56,14 +63,24 @@ def stage_detail(stage_id: int, request: Request):
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa no encontrada")
     steps = list_steps_by_stage(stage_id)
-    stage_slot = entity_slot("stage", stage.id, stage.name)
+    step_rows = [
+        {
+            "id": step.id,
+            "title": step.title,
+            "content": step.content,
+            "tools_json": step.tools_json,
+            "estimated_cost_usd": step.estimated_cost_usd,
+            "image_url": step_image(step),
+        }
+        for step in steps
+    ]
     return templates.TemplateResponse(
         "stage_detail.html",
         {
             "request": request,
             "stage": stage,
-            "steps": steps,
-            "stage_image_path": resolve_static_path("stages", stage_slot, "lg"),
+            "steps": step_rows,
+            "stage_image_url": stage_hero_image(stage),
         },
     )
 
@@ -98,9 +115,8 @@ def kits(request: Request):
                 "description": kit.description,
                 "price": kit.price,
                 "components_json": kit.components_json,
-                "slot": entity_slot("kit", kit.id, kit.name),
-                "image_path": resolve_static_path("kits", entity_slot("kit", kit.id, kit.name), "md"),
-                "result_image_path": resolve_static_path("kits", entity_slot("kit-result", kit.id, kit.name), "md"),
+                "image_url": kit_card_image(kit),
+                "result_image_url": kit_result_image(kit),
             }
         )
     return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows, "hero_path": resolve_static_path("kits", "hero", "md")})
