@@ -235,3 +235,20 @@ Abrir y validar:
 - `/kits`
 - `/stages/1` (o el id real que exista)
 
+
+
+## Placeholders y smoke de rutas (demo-ready)
+
+Placeholders versionados utilizados por el resolver:
+- `app/static/section-images/stages/`
+- `app/static/section-images/steps/`
+- `app/static/section-images/kits/`
+
+Ejecutar smoke de rutas/imágenes (PowerShell):
+```powershell
+py -m pip install -r requirements.txt
+py scripts/smoke_routes.py --base-url http://127.0.0.1:8000
+```
+
+El smoke valida status `200` y cantidad mínima de etiquetas `<img` en `/`, `/stages`, `/stages/23`, `/stages/24`, `/kits`, `/admin` y `/admin/editor`.
+

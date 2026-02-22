@@ -14,7 +14,17 @@ def list_stages() -> list[Stage]:
     _ensure_ready()
     with get_conn() as conn:
         rows = conn.execute("SELECT * FROM stages ORDER BY order_index ASC, id ASC").fetchall()
-    return [Stage(id=row["id"], name=row["name"], order_index=row["order_index"]) for row in rows]
+    return [
+        Stage(
+            id=row["id"],
+            name=row["name"],
+            order_index=row["order_index"],
+            image_card_1=row["image_card_1"],
+            image_card_2=row["image_card_2"],
+            image_hero=row["image_hero"],
+        )
+        for row in rows
+    ]
 
 
 def get_stage(stage_id: int) -> Stage | None:
@@ -23,20 +33,50 @@ def get_stage(stage_id: int) -> Stage | None:
         row = conn.execute("SELECT * FROM stages WHERE id = ?", (stage_id,)).fetchone()
     if not row:
         return None
-    return Stage(id=row["id"], name=row["name"], order_index=row["order_index"])
+    return Stage(
+        id=row["id"],
+        name=row["name"],
+        order_index=row["order_index"],
+        image_card_1=row["image_card_1"],
+        image_card_2=row["image_card_2"],
+        image_hero=row["image_hero"],
+    )
 
 
-def create_stage(name: str, order_index: int) -> int:
+def create_stage(
+    name: str,
+    order_index: int,
+    image_card_1: str | None = None,
+    image_card_2: str | None = None,
+    image_hero: str | None = None,
+) -> int:
     _ensure_ready()
     with get_conn() as conn:
-        cur = conn.execute("INSERT INTO stages(name, order_index) VALUES(?, ?)", (name, order_index))
+        cur = conn.execute(
+            "INSERT INTO stages(name, order_index, image_card_1, image_card_2, image_hero) VALUES(?, ?, ?, ?, ?)",
+            (name, order_index, image_card_1, image_card_2, image_hero),
+        )
         return int(cur.lastrowid)
 
 
-def update_stage(stage_id: int, name: str, order_index: int) -> None:
+def update_stage(
+    stage_id: int,
+    name: str,
+    order_index: int,
+    image_card_1: str | None = None,
+    image_card_2: str | None = None,
+    image_hero: str | None = None,
+) -> None:
     _ensure_ready()
     with get_conn() as conn:
-        conn.execute("UPDATE stages SET name = ?, order_index = ? WHERE id = ?", (name, order_index, stage_id))
+        conn.execute(
+            """
+            UPDATE stages
+            SET name = ?, order_index = ?, image_card_1 = ?, image_card_2 = ?, image_hero = ?
+            WHERE id = ?
+            """,
+            (name, order_index, image_card_1, image_card_2, image_hero, stage_id),
+        )
 
 
 def list_steps_by_stage(stage_id: int) -> list[TutorialStep]:
@@ -53,20 +93,28 @@ def list_steps_by_stage(stage_id: int) -> list[TutorialStep]:
             content=row["content"],
             tools_json=json.loads(row["tools_json"] or "[]"),
             estimated_cost_usd=row["estimated_cost_usd"],
+            image=row["image"],
         )
         for row in rows
     ]
 
 
-def create_step(stage_id: int, title: str, content: str, tools: list[str], estimated_cost_usd: float | None) -> int:
+def create_step(
+    stage_id: int,
+    title: str,
+    content: str,
+    tools: list[str],
+    estimated_cost_usd: float | None,
+    image: str | None = None,
+) -> int:
     _ensure_ready()
     with get_conn() as conn:
         cur = conn.execute(
             """
-            INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd)
-            VALUES(?, ?, ?, ?, ?)
+            INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd, image)
+            VALUES(?, ?, ?, ?, ?, ?)
             """,
-            (stage_id, title, content, json.dumps(tools, ensure_ascii=False), estimated_cost_usd),
+            (stage_id, title, content, json.dumps(tools, ensure_ascii=False), estimated_cost_usd, image),
         )
         return int(cur.lastrowid)
 
@@ -78,8 +126,8 @@ def replace_steps(stage_id: int, steps: list[dict]) -> None:
         for step in steps:
             conn.execute(
                 """
-                INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd, image)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     stage_id,
@@ -87,6 +135,7 @@ def replace_steps(stage_id: int, steps: list[dict]) -> None:
                     step["content"],
                     json.dumps(step.get("tools", []), ensure_ascii=False),
                     step.get("estimated_cost_usd"),
+                    step.get("image"),
                 ),
             )
 
@@ -129,6 +178,8 @@ def list_kits() -> list[Kit]:
             description=row["description"],
             price=row["price"],
             components_json=json.loads(row["components_json"] or "[]"),
+            image_card=row["image_card"],
+            image_result=row["image_result"],
         )
         for row in rows
     ]
@@ -138,6 +189,16 @@ def create_kit(kit: Kit) -> None:
     _ensure_ready()
     with get_conn() as conn:
         conn.execute(
-            "INSERT INTO kits(name, description, price, components_json) VALUES(?, ?, ?, ?)",
-            (kit.name, kit.description, kit.price, json.dumps(kit.components_json, ensure_ascii=False)),
+            """
+            INSERT INTO kits(name, description, price, components_json, image_card, image_result)
+            VALUES(?, ?, ?, ?, ?, ?)
+            """,
+            (
+                kit.name,
+                kit.description,
+                kit.price,
+                json.dumps(kit.components_json, ensure_ascii=False),
+                kit.image_card,
+                kit.image_result,
+            ),
         )

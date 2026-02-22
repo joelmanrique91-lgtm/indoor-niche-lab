@@ -7,6 +7,9 @@ class Stage(BaseModel):
     id: int | None = None
     name: str
     order_index: int
+    image_card_1: str | None = None
+    image_card_2: str | None = None
+    image_hero: str | None = None
 
 
 class TutorialStep(BaseModel):
@@ -16,6 +19,7 @@ class TutorialStep(BaseModel):
     content: str
     tools_json: list[str] = Field(default_factory=list)
     estimated_cost_usd: float | None = None
+    image: str | None = None
 
 
 class Product(BaseModel):
@@ -33,6 +37,8 @@ class Kit(BaseModel):
     description: str
     price: float
     components_json: list[str] = Field(default_factory=list)
+    image_card: str | None = None
+    image_result: str | None = None
 
 
 class AIStep(BaseModel):

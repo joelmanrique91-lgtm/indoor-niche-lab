@@ -353,6 +353,21 @@ a:hover { color: var(--color-link-hover); }
   margin-top: 0.9rem;
 }
 
+
+.stage-list-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-bottom: 0.8rem;
+}
+
+.stage-list-image {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e4e4e7;
+}
 .stage-item-head {
   display: flex;
   align-items: center;

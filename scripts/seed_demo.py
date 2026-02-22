@@ -6,6 +6,14 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from app.db import get_conn, init_db
 
 
+STAGE_CARD_1 = "section-images/stages/stage.card.1.v1.svg"
+STAGE_CARD_2 = "section-images/stages/stage.card.2.v1.svg"
+STAGE_HERO = "section-images/stages/stage.hero.v1.svg"
+STEP_IMAGE = "section-images/steps/step.placeholder.v1.svg"
+KIT_CARD = "section-images/kits/kit.card.v1.svg"
+KIT_RESULT = "section-images/kits/kit.result.v1.svg"
+
+
 def seed_demo_data() -> None:
     """Carga datos demo mínimos para navegar el MVP."""
     with get_conn() as conn:
@@ -15,28 +23,28 @@ def seed_demo_data() -> None:
         conn.execute("DELETE FROM kits")
 
         conn.executemany(
-            "INSERT INTO stages(name, order_index) VALUES(?, ?)",
+            """
+            INSERT INTO stages(id, name, order_index, image_card_1, image_card_2, image_hero)
+            VALUES(?, ?, ?, ?, ?, ?)
+            """,
             [
-                ("Preparación del sustrato", 1),
-                ("Inoculación e incubación", 2),
+                (23, "Preparación del sustrato", 1, STAGE_CARD_1, STAGE_CARD_2, STAGE_HERO),
+                (24, "Inoculación e incubación", 2, STAGE_CARD_1, STAGE_CARD_2, STAGE_HERO),
             ],
         )
 
-        stage_rows = conn.execute("SELECT id, name FROM stages ORDER BY order_index").fetchall()
-        ids = {row["name"]: row["id"] for row in stage_rows}
-
         steps = [
-            (ids["Preparación del sustrato"], "Hidratación de paja", "Objetivo: lograr humedad óptima (65%).\n\nChecklist:\n- Paja limpia\n- Agua hervida", '["Balde","Termómetro"]', 12),
-            (ids["Preparación del sustrato"], "Pasteurización", "Objetivo: bajar carga microbiana.\n\nChecklist:\n- 65-75°C\n- 90 minutos", '["Olla","Termómetro"]', 18),
-            (ids["Preparación del sustrato"], "Enfriado y escurrido", "Objetivo: dejar el sustrato listo para inocular.", '["Guantes","Bandeja"]', 6),
-            (ids["Inoculación e incubación"], "Mezcla con spawn", "Objetivo: distribución homogénea del micelio.", '["Alcohol 70%","Guantes"]', 20),
-            (ids["Inoculación e incubación"], "Armado de bolsas", "Objetivo: mantener intercambio gaseoso controlado.", '["Bolsas con filtro","Precinto"]', 14),
-            (ids["Inoculación e incubación"], "Incubación controlada", "Objetivo: colonización completa en ambiente oscuro.", '["Estantería","Higrómetro"]', 10),
+            (23, "Hidratación de paja", "Objetivo: lograr humedad óptima (65%).\n\nChecklist:\n- Paja limpia\n- Agua hervida", '["Balde","Termómetro"]', 12, STEP_IMAGE),
+            (23, "Pasteurización", "Objetivo: bajar carga microbiana.\n\nChecklist:\n- 65-75°C\n- 90 minutos", '["Olla","Termómetro"]', 18, STEP_IMAGE),
+            (23, "Enfriado y escurrido", "Objetivo: dejar el sustrato listo para inocular.", '["Guantes","Bandeja"]', 6, STEP_IMAGE),
+            (24, "Mezcla con spawn", "Objetivo: distribución homogénea del micelio.", '["Alcohol 70%","Guantes"]', 20, STEP_IMAGE),
+            (24, "Armado de bolsas", "Objetivo: mantener intercambio gaseoso controlado.", '["Bolsas con filtro","Precinto"]', 14, STEP_IMAGE),
+            (24, "Incubación controlada", "Objetivo: colonización completa en ambiente oscuro.", '["Estantería","Higrómetro"]', 10, STEP_IMAGE),
         ]
         conn.executemany(
             """
-            INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd)
-            VALUES(?, ?, ?, ?, ?)
+            INSERT INTO tutorial_steps(stage_id, title, content, tools_json, estimated_cost_usd, image)
+            VALUES(?, ?, ?, ?, ?, ?)
             """,
             steps,
         )
@@ -62,16 +70,20 @@ def seed_demo_data() -> None:
                 "Ideal para primera cosecha en interior con bajo presupuesto.",
                 59.0,
                 '["Spawn ostra 1kg","2 bolsas con filtro","Rociador","Guía rápida"]',
+                KIT_CARD,
+                KIT_RESULT,
             ),
             (
                 "Kit Melena de León Pro",
                 "Enfoque en control ambiental para mejores resultados.",
                 89.0,
                 '["Spawn melena 1kg","4 bolsas con filtro","Higrómetro","Termómetro","Manual PDF"]',
+                KIT_CARD,
+                KIT_RESULT,
             ),
         ]
         conn.executemany(
-            "INSERT INTO kits(name, description, price, components_json) VALUES(?, ?, ?, ?)",
+            "INSERT INTO kits(name, description, price, components_json, image_card, image_result) VALUES(?, ?, ?, ?, ?, ?)",
             kits,
         )
 

@@ -102,14 +102,22 @@ def generate_action(stage_id: int):
 
 @router.post("/editor/stage")
 def create_or_update_stage(
-    stage_id: int | None = Form(default=None), name: str = Form(...), order_index: int = Form(...)
+    stage_id: int | None = Form(default=None),
+    name: str = Form(...),
+    order_index: int = Form(...),
+    image_card_1: str = Form(default=""),
+    image_card_2: str = Form(default=""),
+    image_hero: str = Form(default=""),
 ):
     from app.repositories import update_stage
 
+    img1 = image_card_1.strip() or None
+    img2 = image_card_2.strip() or None
+    hero = image_hero.strip() or None
     if stage_id:
-        update_stage(stage_id, name, order_index)
+        update_stage(stage_id, name, order_index, img1, img2, hero)
     else:
-        create_stage(name, order_index)
+        create_stage(name, order_index, img1, img2, hero)
     return RedirectResponse(url="/admin/editor", status_code=303)
 
 
@@ -120,7 +128,8 @@ def add_step(
     content: str = Form(...),
     tools_csv: str = Form(default=""),
     estimated_cost_usd: float = Form(default=0),
+    image: str = Form(default=""),
 ):
     tools = [item.strip() for item in tools_csv.split(",") if item.strip()]
-    create_step(stage_id, title, content, tools, estimated_cost_usd)
+    create_step(stage_id, title, content, tools, estimated_cost_usd, image.strip() or None)
     return RedirectResponse(url=f"/admin/editor?stage_id={stage_id}", status_code=303)
