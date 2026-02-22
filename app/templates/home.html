@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="hero" aria-labelledby="hero-title">
+<section class="hero" aria-labelledby="hero-title" id="inicio">
   <div class="hero-content">
     <span class="hero-logo">🍄 Indoor Niche Lab</span>
     <h1 id="hero-title">Cultivá hongos gourmet en casa y logr&aacute; tu primera cosecha en 20&ndash;35 días.</h1>
@@ -11,17 +11,17 @@
       <li>Garantía de satisfacción de 30 días.</li>
     </ul>
     <div class="actions hero-actions">
-      <a class="btn btn-cta" href="/kits">Empieza tu cultivo hoy</a>
+      <a class="btn btn-primary-action" href="/kits">Empieza tu cultivo hoy</a>
     </div>
     <p class="cta-microcopy">Más de 450 clientes ya empezaron con este mismo sistema.</p>
   </div>
   <div class="hero-visual">
-    <img src="{{ url_for('static', path=img['home.hero']) }}" alt="Persona cosechando hongos gourmet frescos en una cocina de hogar" loading="eager">
+    <img src="{{ url_for('static', path=img['home.hero']) }}" alt="Persona cosechando hongos gourmet frescos en una cocina de hogar" loading="eager" decoding="sync" width="640" height="420">
     <span class="hero-visual-badge">Resultado real en casa: primera cosecha guiada</span>
   </div>
 </section>
 
-<section id="beneficios" class="section">
+<section id="beneficios" class="section" data-home-section="beneficios">
   <div class="section-head">
     <p class="eyebrow">Beneficios</p>
     <h2>Un sistema simple para lograr resultados reales</h2>
@@ -29,39 +29,39 @@
   </div>
   <div class="benefits-grid">
     <article class="benefit-card">
-      <img src="{{ url_for('static', path=img['home.beneficios-1']) }}" alt="Kit de cultivo indoor listo para comenzar sobre mesa de trabajo" loading="lazy" class="benefit-photo">
+      <img src="{{ url_for('static', path=img['home.beneficios-1']) }}" alt="Kit de cultivo indoor listo para comenzar sobre mesa de trabajo" loading="lazy" decoding="async" class="benefit-photo" width="360" height="160">
       <h3>Todo en un solo kit</h3>
       <p>Incluye lo esencial para iniciar sin perder tiempo buscando insumos por separado.</p>
     </article>
     <article class="benefit-card">
-      <img src="{{ url_for('static', path=img['home.beneficios-2']) }}" alt="Cosecha abundante de hongos gourmet recién cortados" loading="lazy" class="benefit-photo">
+      <img src="{{ url_for('static', path=img['home.beneficios-2']) }}" alt="Cosecha abundante de hongos gourmet recién cortados" loading="lazy" decoding="async" class="benefit-photo" width="360" height="160">
       <h3>Guía práctica por etapas</h3>
       <p>Sabes exactamente qué hacer cada día para avanzar con confianza hacia tu cosecha.</p>
     </article>
     <article class="benefit-card">
-      <img src="{{ url_for('static', path=img['home.beneficios-3']) }}" alt="Persona recibiendo asesoría de soporte para cultivo por mensaje" loading="lazy" class="benefit-photo">
+      <img src="{{ url_for('static', path=img['home.beneficios-3']) }}" alt="Persona recibiendo asesoría de soporte para cultivo por mensaje" loading="lazy" decoding="async" class="benefit-photo" width="360" height="160">
       <h3>Soporte cuando lo necesitás</h3>
       <p>Si te trabas, te ayudamos a resolverlo rápido para que no abandones el proceso.</p>
     </article>
   </div>
-  <a class="btn btn-cta section-cta" href="/kits">Ver kits y elegir el ideal</a>
+  <a class="btn btn-secondary-action section-cta" href="/kits">Ver kits y elegir el ideal</a>
 </section>
 
-<section id="como-funciona" class="section">
+<section id="como-funciona" class="section" data-home-section="como-funciona">
   <div class="section-head">
     <p class="eyebrow">Cómo funciona</p>
     <h2>Tu primera cosecha en 3 pasos claros</h2>
     <p class="section-support">Un flujo simple para que pases de principiante a cosecha sin fricciones.</p>
   </div>
   <div class="steps-grid">
-    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-1']) }}" alt="Entrega de kit de cultivo listo para abrir en el hogar" loading="lazy" class="step-photo"><div class="step-copy"><span>1</span><h3>Recibís tu kit</h3><p>Llega a tu casa con instrucciones claras para iniciar ese mismo día.</p></div></article>
-    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-2']) }}" alt="Seguimiento de checklist de cultivo en una guía impresa" loading="lazy" class="step-photo"><div class="step-copy"><span>2</span><h3>Seguís la guía</h3><p>Aplicás un checklist simple por etapas para evitar errores comunes.</p></div></article>
-    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-3']) }}" alt="Resultado final de hongos gourmet cosechados en cocina" loading="lazy" class="step-photo"><div class="step-copy"><span>3</span><h3>Cosechás y repetís</h3><p>Lográs tu primera producción y quedás listo para repetir el ciclo.</p></div></article>
+    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-1']) }}" alt="Entrega de kit de cultivo listo para abrir en el hogar" loading="lazy" decoding="async" class="step-photo" width="360" height="180"><div class="step-copy"><span>1</span><h3>Recibís tu kit</h3><p>Llega a tu casa con instrucciones claras para iniciar ese mismo día.</p></div></article>
+    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-2']) }}" alt="Seguimiento de checklist de cultivo en una guía impresa" loading="lazy" decoding="async" class="step-photo" width="360" height="180"><div class="step-copy"><span>2</span><h3>Seguís la guía</h3><p>Aplicás un checklist simple por etapas para evitar errores comunes.</p></div></article>
+    <article class="step-card"><img src="{{ url_for('static', path=img['home.como-funciona-3']) }}" alt="Resultado final de hongos gourmet cosechados en cocina" loading="lazy" decoding="async" class="step-photo" width="360" height="180"><div class="step-copy"><span>3</span><h3>Cosechás y repetís</h3><p>Lográs tu primera producción y quedás listo para repetir el ciclo.</p></div></article>
   </div>
-  <a class="btn btn-cta section-cta" href="/kits">Quiero ver resultados reales</a>
+  <a class="btn btn-secondary-action section-cta" href="/kits">Quiero ver resultados reales</a>
 </section>
 
-<section id="testimonios" class="section">
+<section id="testimonios" class="section" data-home-section="testimonios">
   <div class="section-head">
     <p class="eyebrow">Prueba social</p>
     <h2>Testimonios reales de alumnos y clientes</h2>
@@ -69,60 +69,60 @@
   </div>
   <div class="testimonials-grid">
     <article class="testimonial-card">
-      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-1']) }}" alt="Foto de Andrea cliente de Indoor Niche Lab" loading="lazy">
+      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-1']) }}" alt="Foto de Andrea cliente de Indoor Niche Lab" loading="lazy" decoding="async" width="64" height="64">
       <p class="stars" aria-label="5 estrellas">★★★★★</p>
       <p>“A los 25 días coseché mi primera tanda. La guía me llevó paso a paso y nunca me sentí sola.”</p>
       <strong>Andrea, CABA · 1ra cosecha en 25 días</strong>
     </article>
     <article class="testimonial-card">
-      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-2']) }}" alt="Foto de Martín cliente de Indoor Niche Lab" loading="lazy">
+      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-2']) }}" alt="Foto de Martín cliente de Indoor Niche Lab" loading="lazy" decoding="async" width="64" height="64">
       <p class="stars" aria-label="5 estrellas">★★★★★</p>
       <p>“Con el Kit Melena Pro dupliqué mi producción del segundo ciclo. El soporte técnico hace diferencia.”</p>
       <strong>Martín, Buenos Aires · +2x rendimiento en ciclo 2</strong>
     </article>
     <article class="testimonial-card">
-      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-3']) }}" alt="Foto de Lucía cliente de Indoor Niche Lab" loading="lazy">
+      <img class="avatar-photo" src="{{ url_for('static', path=img['home.testimonios-3']) }}" alt="Foto de Lucía cliente de Indoor Niche Lab" loading="lazy" decoding="async" width="64" height="64">
       <p class="stars" aria-label="5 estrellas">★★★★★</p>
       <p>“Empecé para consumo personal y hoy vendo parte de cada cosecha. El sistema es simple y repetible.”</p>
       <strong>Lucía, Córdoba · Produce y vende cada mes</strong>
     </article>
   </div>
   <div class="trust-seals" aria-label="Sellos de confianza">
-    <span>✅ Garantía 30 días</span>
-    <span>🔒 Pago seguro</span>
-    <span>🚚 Envíos a todo el país</span>
+    <span class="trust-badge">✅ Garantía 30 días</span>
+    <span class="trust-badge">🔒 Pago seguro</span>
+    <span class="trust-badge">🚚 Envíos a todo el país</span>
   </div>
-  <a class="btn btn-cta section-cta" href="/kits">Empieza con el kit recomendado</a>
+  <a class="btn btn-secondary-action section-cta" href="/kits">Empieza con el kit recomendado</a>
 </section>
 
-<section id="faq" class="section">
+<section id="faq" class="section" data-home-section="faq">
   <div class="section-head">
     <p class="eyebrow">Preguntas frecuentes</p>
     <h2>Todo lo que necesitás para decidir hoy</h2>
     <p class="section-support">Respuestas breves para que avances con seguridad.</p>
   </div>
   <div class="section-visual-wrap">
-    <img class="section-visual" src="{{ url_for('static', path=img['home.faq']) }}" alt="Mesa limpia de soporte y preguntas frecuentes" loading="lazy" decoding="async">
+    <img class="section-visual" src="{{ url_for('static', path=img['home.faq']) }}" alt="Mesa limpia de soporte y preguntas frecuentes" loading="lazy" decoding="async" width="900" height="340">
   </div>
-  <div class="faq-list">
-    <details>
-      <summary>¿Necesito experiencia previa?</summary>
-      <p>No. El sistema está diseñado para principiantes, con guía y checklist diario.</p>
-    </details>
-    <details>
-      <summary>¿Cuánto tarda la primera cosecha?</summary>
-      <p>Entre 20 y 35 días según variedad y condiciones de tu espacio.</p>
-    </details>
-    <details>
-      <summary>¿Qué incluye el kit?</summary>
-      <p>Insumos esenciales, guía paso a paso y soporte para resolver bloqueos.</p>
-    </details>
-    <details>
-      <summary>¿Tengo garantía?</summary>
-      <p>Sí, tenés 30 días de garantía de satisfacción y acompañamiento.</p>
-    </details>
+  <div class="faq-list" data-faq-accordion>
+    <article class="faq-item">
+      <h3><button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-1" id="faq-trigger-1">¿Necesito experiencia previa?</button></h3>
+      <div class="faq-panel" id="faq-panel-1" role="region" aria-labelledby="faq-trigger-1" hidden><p>No. El sistema está diseñado para principiantes, con guía y checklist diario.</p></div>
+    </article>
+    <article class="faq-item">
+      <h3><button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-2" id="faq-trigger-2">¿Cuánto tarda la primera cosecha?</button></h3>
+      <div class="faq-panel" id="faq-panel-2" role="region" aria-labelledby="faq-trigger-2" hidden><p>Entre 20 y 35 días según variedad y condiciones de tu espacio.</p></div>
+    </article>
+    <article class="faq-item">
+      <h3><button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-3" id="faq-trigger-3">¿Qué incluye el kit?</button></h3>
+      <div class="faq-panel" id="faq-panel-3" role="region" aria-labelledby="faq-trigger-3" hidden><p>Insumos esenciales, guía paso a paso y soporte para resolver bloqueos.</p></div>
+    </article>
+    <article class="faq-item">
+      <h3><button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-4" id="faq-trigger-4">¿Tengo garantía?</button></h3>
+      <div class="faq-panel" id="faq-panel-4" role="region" aria-labelledby="faq-trigger-4" hidden><p>Sí, tenés 30 días de garantía de satisfacción y acompañamiento.</p></div>
+    </article>
   </div>
-  <a class="btn btn-cta section-cta" href="/kits">Elegir mi kit y empezar</a>
+  <a class="btn btn-primary-action section-cta" href="/kits">Elegir mi kit y empezar</a>
 </section>
 
 <footer class="landing-footer">
