@@ -1,17 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Etapas del cultivo</h1>
+<img class="stage-banner" src="/static/section-images/stages/stages.banner.placeholder.v1.svg" alt="Vista general de etapas" loading="lazy">
+
 <div class="grid">
   {% for stage in stages %}
   <article class="card stage-item-card">
     <div class="stage-item-head">
       <img
         class="stage-icon-image"
-        src="{{ [
-          '/static/img/generated/stage_list-01-imagen-representativa-de-la-etapa-stage-name-lg.webp',
-          '/static/img/generated/stage_list-02-imagen-representativa-de-la-etapa-stage-name-lg.webp',
-          '/static/img/generated/stage_list-03-imagen-representativa-de-la-etapa-stage-name-lg.webp'
-        ][loop.index0 % 3] }}"
+        src="{{ stage.image_url }}"
         alt="Imagen representativa de la etapa {{ stage.name }}"
         loading="lazy"
       >

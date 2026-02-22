@@ -90,6 +90,9 @@ python scripts\generate_site_images.py --size 1536x1024 --quality high
 python scripts\generate_site_images.py --mock
 ```
 
+> Nota de baseline: el runtime del sitio usa imágenes versionadas en `app/static/section-images/...`.
+> Si generás imágenes con scripts IA, copiá/mové los resultados finales a `section-images` y commitealos para mantener reproducibilidad.
+
 El script:
 1. extrae contexto semántico por sección desde `app/templates/*.html`,
 2. construye prompts estandarizados con estilo visual único,

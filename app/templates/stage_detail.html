@@ -1,25 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{ stage.name }}</h1>
-{% if stage.id == 13 %}
-<img class="stage-banner" src="/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp" alt="Proceso real de hidratación y pasteurización del sustrato" loading="lazy">
-{% elif stage.id == 14 %}
-<img class="stage-banner" src="/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp" alt="Incubación del cultivo en ambiente controlado" loading="lazy">
-{% else %}
-<img class="stage-banner" src="/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
-{% endif %}
+<img class="stage-banner" src="{{ banner_url }}" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
 <p><a href="/stages">← Volver a etapas</a></p>
 
 {% for step in steps %}
 <article class="card stage-step-card">
   <img
     class="stage-step-image"
-    src="{{ [
-      '/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp',
-      '/static/img/generated/stage_detail-05-miniatura-del-proceso-step-title-lg.webp',
-      '/static/img/generated/stage_detail-06-miniatura-del-proceso-step-title-lg.webp',
-      '/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp'
-    ][loop.index0 % 4] }}"
+    src="{{ banner_url }}"
     alt="Miniatura del proceso: {{ step.title }}"
     loading="lazy"
   >
