@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 
 from app.repositories import get_stage, list_kits, list_products, list_stages, list_steps_by_stage
 from app.services.image_resolver import (
@@ -102,3 +105,38 @@ def kits(request: Request):
             }
         )
     return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows})
+
+
+@router.get("/debug/static-check")
+def debug_static_check(request: Request):
+    generated_root = Path("app/static/img/generated")
+    files = []
+    total_bytes = 0
+    if generated_root.exists():
+        for path in sorted(generated_root.rglob("*")):
+            if not path.is_file():
+                continue
+            size = path.stat().st_size
+            rel = path.relative_to(Path("app/static")).as_posix()
+            files.append({
+                "relative": rel,
+                "size": size,
+                "url": request.url_for("static", path=rel),
+            })
+            total_bytes += size
+
+    html_parts = [
+        "<html><body>",
+        "<h1>Debug static check</h1>",
+        f"<p>Total archivos: {len(files)}</p>",
+        f"<p>Total bytes: {total_bytes}</p>",
+        "<ul>",
+    ]
+    for item in files:
+        url = str(item["url"])
+        html_parts.append(
+            f"<li><a href='{url}' target='_blank'>{item['relative']}</a> ({item['size']} bytes)<br>"
+            f"<img src='{url}' alt='{item['relative']}' width='260' loading='lazy'></li><br>"
+        )
+    html_parts.extend(["</ul>", "</body></html>"])
+    return HTMLResponse("".join(html_parts))

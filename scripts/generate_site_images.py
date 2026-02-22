@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME_TEMPLATE = ROOT / "app/templates/home.html"
-OUTPUT_ROOT = ROOT / "app/static/img/generated/home"
+OUTPUT_ROOT = ROOT / "app/static/img/generated"
 MANIFEST_PATH = ROOT / "data/generated_images_manifest.json"
 
 MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
@@ -22,40 +22,45 @@ MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
 
 @dataclass(frozen=True)
 class SlotSpec:
+    section: str
     slot: str
     alt: str
     prompt: str
     source_template: str = "app/templates/home.html"
 
+    @property
+    def slot_key(self) -> str:
+        return f"{self.section}.{self.slot}"
+
 
 HOME_SLOTS: list[SlotSpec] = [
-    SlotSpec("home.hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto."),
-    SlotSpec("home.beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos."),
-    SlotSpec("home.beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida."),
-    SlotSpec("home.beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla."),
-    SlotSpec("home.como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural."),
-    SlotSpec("home.como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural."),
-    SlotSpec("home.como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida."),
-    SlotSpec("home.testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones."),
-    SlotSpec("home.testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro."),
-    SlotSpec("home.testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio."),
-    SlotSpec("home.faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural."),
+    SlotSpec("home", "hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto."),
+    SlotSpec("home", "beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos."),
+    SlotSpec("home", "beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida."),
+    SlotSpec("home", "beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla."),
+    SlotSpec("home", "como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural."),
+    SlotSpec("home", "como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural."),
+    SlotSpec("home", "como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida."),
+    SlotSpec("home", "testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones."),
+    SlotSpec("home", "testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro."),
+    SlotSpec("home", "testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio."),
+    SlotSpec("home", "faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural."),
 ]
 
 SIZES = {"sm": (640, 426), "md": (1024, 683), "lg": (1536, 1024)}
 
 
-def _slot_dir(slot: str) -> Path:
-    return OUTPUT_ROOT / slot
+def _slot_dir(section: str, slot: str) -> Path:
+    return OUTPUT_ROOT / section / slot
 
 
-def _output_files(slot: str) -> dict[str, Path]:
-    base = _slot_dir(slot)
+def _output_files(section: str, slot: str) -> dict[str, Path]:
+    base = _slot_dir(section, slot)
     return {k: base / f"{k}.webp" for k in SIZES}
 
 
-def _is_complete(slot: str) -> bool:
-    return all(path.exists() for path in _output_files(slot).values())
+def _is_complete(section: str, slot: str) -> bool:
+    return all(path.exists() and path.stat().st_size > 0 for path in _output_files(section, slot).values())
 
 
 def _generate_real_png(client, prompt: str) -> bytes:
@@ -78,8 +83,8 @@ def _generate_mock_png(slot: str, prompt: str) -> bytes:
     return buf.getvalue()
 
 
-def _save_webp_variants(png_bytes: bytes, slot: str) -> dict[str, str]:
-    out = _output_files(slot)
+def _save_webp_variants(png_bytes: bytes, section: str, slot: str) -> dict[str, str]:
+    out = _output_files(section, slot)
     out[next(iter(out))].parent.mkdir(parents=True, exist_ok=True)
     with Image.open(BytesIO(png_bytes)) as image:
         source = image.convert("RGB")
@@ -88,6 +93,7 @@ def _save_webp_variants(png_bytes: bytes, slot: str) -> dict[str, str]:
             variant = source.resize(dims, Image.Resampling.LANCZOS)
             variant.save(out[size_name], format="WEBP", quality=82, method=6)
             public[size_name] = str(out[size_name].relative_to(ROOT))
+            print(f"[images] Archivo creado correctamente: {out[size_name]}")
         return public
 
 
@@ -114,46 +120,98 @@ def _upsert_manifest(manifest: list[dict], row: dict) -> None:
     manifest.append(row)
 
 
-def generate_home(mock: bool, force: bool) -> None:
+def sanity_check_outputs(manifest: list[dict]) -> tuple[int, list[str]]:
+    stale_slots: list[str] = []
+    for row in manifest:
+        slot = row.get("slot", "")
+        output_files = row.get("output_files", {})
+        if not isinstance(output_files, dict) or not output_files:
+            continue
+        missing = False
+        for relative in output_files.values():
+            output_path = ROOT / str(relative)
+            if not output_path.exists() or output_path.stat().st_size <= 0:
+                missing = True
+                break
+        if missing:
+            stale_slots.append(slot)
+    print(f"[images] sanity_check_outputs: stale={len(stale_slots)}")
+    return len(stale_slots), stale_slots
+
+
+def generate_home(mock: bool, force: bool) -> tuple[dict[str, int], list[str]]:
     manifest = _load_manifest()
+    _, stale_slots = sanity_check_outputs(manifest)
+
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+
+    counters = {"generated": 0, "skipped-existing": 0, "regenerated-stale": 0, "failed": 0}
+    failures: list[str] = []
+
     client = None
     if not mock:
         from openai import OpenAI
 
         client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+    stale_set = set(stale_slots)
+
     for spec in HOME_SLOTS:
-        files = _output_files(spec.slot)
-        if _is_complete(spec.slot) and not force:
+        files = _output_files(spec.section, spec.slot)
+        slot_key = spec.slot_key
+        output_dir = files["md"].parent
+        prompt_preview = spec.prompt.replace("\n", " ")[:120]
+
+        try:
+            is_complete = _is_complete(spec.section, spec.slot)
+            if is_complete and not force:
+                status = "skipped-existing"
+                counters[status] += 1
+                print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result={status}")
+                row = {
+                    "slot": slot_key,
+                    "prompt": spec.prompt,
+                    "alt": spec.alt,
+                    "model": "mock" if mock else MODEL,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "source_template": spec.source_template,
+                    "output_files": {k: str(v.relative_to(ROOT)) for k, v in files.items()},
+                    "status": status,
+                }
+                _upsert_manifest(manifest, row)
+                continue
+
+            stale = slot_key in stale_set and not force
+            if stale:
+                print(f"[images] slot={slot_key} detectado como stale_missing. Regenerando...")
+
+            print(f"[images] Generando imagen para sección: {slot_key}")
+            print(f"[images] Guardando en: {output_dir}")
+            png = _generate_mock_png(slot_key, spec.prompt) if mock else _generate_real_png(client, spec.prompt)
+            saved = _save_webp_variants(png, spec.section, spec.slot)
+
+            status = "regenerated-stale" if stale else "generated"
+            counters[status] += 1
+            print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result={status}")
             row = {
-                "slot": spec.slot,
+                "slot": slot_key,
                 "prompt": spec.prompt,
                 "alt": spec.alt,
                 "model": "mock" if mock else MODEL,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "source_template": spec.source_template,
-                "output_files": {k: str(v.relative_to(ROOT)) for k, v in files.items()},
-                "status": "skipped-existing",
+                "output_files": saved,
+                "status": status,
             }
             _upsert_manifest(manifest, row)
-            continue
-
-        png = _generate_mock_png(spec.slot, spec.prompt) if mock else _generate_real_png(client, spec.prompt)
-        saved = _save_webp_variants(png, spec.slot)
-        row = {
-            "slot": spec.slot,
-            "prompt": spec.prompt,
-            "alt": spec.alt,
-            "model": "mock" if mock else MODEL,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "source_template": spec.source_template,
-            "output_files": saved,
-            "status": "generated",
-        }
-        _upsert_manifest(manifest, row)
+        except Exception as exc:
+            counters["failed"] += 1
+            failures.append(f"{slot_key}: {exc}")
+            print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result=failed error={exc}")
 
     manifest.sort(key=lambda x: x.get("slot", ""))
     _write_manifest(manifest)
+    return counters, failures
 
 
 def parse_args() -> argparse.Namespace:
@@ -165,19 +223,59 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
+def _resolve_mode(args: argparse.Namespace) -> bool:
+    has_key = bool(os.environ.get("OPENAI_API_KEY"))
     if args.mock and args.real:
         raise SystemExit("Elegí solo un modo: --mock o --real")
+    if args.mock:
+        print("[images] mode=MOCK (forced by --mock)")
+        return True
+    if args.real:
+        if not has_key:
+            raise SystemExit("Falta OPENAI_API_KEY. No se puede usar --real sin API key")
+        print("[images] mode=REAL (forced by --real)")
+        return False
+    if has_key:
+        print("[images] mode=REAL (OPENAI_API_KEY present)")
+        return False
+    print("[images] mode=MOCK (reason=OPENAI_API_KEY missing)")
+    return True
 
-    use_mock = args.mock or not args.real
-    if not use_mock and not os.environ.get("OPENAI_API_KEY"):
-        raise SystemExit("Falta OPENAI_API_KEY. Usá --mock o configurá la variable para --real")
+
+def _count_generated_files() -> int:
+    return sum(1 for path in OUTPUT_ROOT.rglob("*.webp") if path.is_file() and path.stat().st_size > 0)
+
+
+def main() -> None:
+    args = parse_args()
+    use_mock = _resolve_mode(args)
 
     if args.only == "home":
         if not HOME_TEMPLATE.exists():
             raise SystemExit("No se encontró app/templates/home.html")
-        generate_home(mock=use_mock, force=args.force)
+        counters, failures = generate_home(mock=use_mock, force=args.force)
+    else:
+        counters, failures = ({}, [])
+
+    total_files = _count_generated_files()
+    print(
+        "[images] resumen "
+        f"generated={counters.get('generated', 0)} "
+        f"skipped-existing={counters.get('skipped-existing', 0)} "
+        f"regenerated-stale={counters.get('regenerated-stale', 0)} "
+        f"failed={counters.get('failed', 0)} "
+        f"files_on_disk={total_files}"
+    )
+    if failures:
+        print("[images] fallas detectadas:")
+        for item in failures:
+            print(f" - {item}")
+
+    if not use_mock and total_files == 0:
+        raise SystemExit("Ejecución REAL sin archivos generados: verifique OPENAI_API_KEY, cuotas y errores previos")
+
+    if counters.get("failed", 0) > 0:
+        raise SystemExit("Generación completada con fallas")
 
     print("Generación completada")
 
