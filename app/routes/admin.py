@@ -17,6 +17,15 @@ from app.services.ai_content import generate_stage_tutorial
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
 
+def _stage_illustration(name: str) -> str:
+    normalized = "".join(ch.lower() if ch.isalnum() else " " for ch in name)
+    slug = "-".join(normalized.split())
+    mapping = {
+        "preparacion-del-sustrato": "/static/assets/illustrations/substrate_prep.svg",
+        "inoculacion-e-incubacion": "/static/assets/illustrations/incubation.svg",
+    }
+    return mapping.get(slug, "/static/assets/illustrations/stage_default.svg")
+
 
 def _seed_demo_data() -> None:
     from scripts.seed_demo import seed_demo_data
@@ -27,7 +36,7 @@ def _seed_demo_data() -> None:
 @router.get("")
 def dashboard(request: Request, message: str = ""):
     return templates.TemplateResponse(
-        "admin/dashboard.html", {"request": request, "message": message, "stages": list_stages()}
+        "admin/dashboard.html", {"request": request, "message": message, "stages": list_stages(), "stage_illustration": _stage_illustration}
     )
 
 
