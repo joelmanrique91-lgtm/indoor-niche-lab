@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Etapas del cultivo</h1>
-<img class="stage-banner" src="/static/section-images/stages/stages.banner.placeholder.v1.svg" alt="Vista general de etapas" loading="lazy">
+<img class="stage-banner" src="{{ url_for('static', path='section-images/stages/stages.banner.placeholder.v1.svg') }}" alt="Vista general de etapas" loading="lazy">
 
 <div class="grid">
   {% for stage in stages %}

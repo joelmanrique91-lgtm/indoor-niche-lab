@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Productos recomendados</h1>
-<img class="catalog-product-image" src="/static/section-images/products/products.card.placeholder.v1.svg" alt="Vista general de productos" loading="lazy">
+<img class="catalog-product-image" src="{{ url_for('static', path='section-images/products/products.card.placeholder.v1.svg') }}" alt="Vista general de productos" loading="lazy">
 
 <div class="grid">
   {% for p in products %}

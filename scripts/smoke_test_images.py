@@ -68,12 +68,12 @@ def _check_home_render_and_images() -> None:
 
     html = response.text
     expected_snippets = [
-        "home.como-funciona-1",
-        "home.como-funciona-2",
-        "home.como-funciona-3",
-        "home.testimonios-1",
-        "home.testimonios-2",
-        "home.testimonios-3",
+        "/static/img/generated/home/como-funciona-1",
+        "/static/img/generated/home/como-funciona-2",
+        "/static/img/generated/home/como-funciona-3",
+        "/static/img/generated/home/testimonios-1",
+        "/static/img/generated/home/testimonios-2",
+        "/static/img/generated/home/testimonios-3",
     ]
     if not all(snippet in html for snippet in expected_snippets):
         raise SystemExit("El home renderizado no contiene referencias a los nuevos slots granulares.")

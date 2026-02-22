@@ -144,3 +144,28 @@ pytest
 
 ## Linux/macOS
 Existe `uvicorn.sh` para arranque rápido en bash.
+
+
+## Generar imágenes (REAL)
+
+PowerShell (Windows):
+```powershell
+$env:OPENAI_API_KEY="tu_api_key"
+python scripts\generate_site_images.py --real --force
+```
+
+El script genera archivos en: `app/static/img/generated/{section}/{slot}/{size}.webp`
+
+## Verificar imágenes servidas
+
+Con el server levantado:
+```powershell
+start http://127.0.0.1:8000/static/img/generated/home/hero/md.webp
+start http://127.0.0.1:8000/debug/static-check
+```
+
+Tambien podés probar por terminal:
+```powershell
+Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/home/hero/md.webp -Method Head
+Invoke-WebRequest http://127.0.0.1:8000/debug/static-check -Method Get
+```

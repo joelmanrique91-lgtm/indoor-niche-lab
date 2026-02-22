@@ -9,6 +9,7 @@ STATIC_SECTION_ROOT = ROOT / "app" / "static" / "section-images"
 STATIC_GENERATED_ROOT = ROOT / "app" / "static" / "img" / "generated"
 SECTION_PUBLIC_PREFIX = "/static/section-images"
 GENERATED_PUBLIC_PREFIX = "/static/img/generated"
+DEFAULT_IMAGE_PLACEHOLDER = f"{SECTION_PUBLIC_PREFIX}/home/home.hero.v1.svg"
 
 HOME_IMAGES_LEGACY: dict[str, str] = {
     "hero": f"{SECTION_PUBLIC_PREFIX}/home/home.hero.v1.svg",
@@ -58,11 +59,11 @@ def _resolve_by_prefix(folder: str, prefix: str, slug: str | None, fallback: str
 
 def _home_generated(slot: str, preferred: str = "md") -> str | None:
     size_order = [preferred] + [size for size in ("sm", "lg", "md") if size != preferred]
-    slot_root = STATIC_GENERATED_ROOT / "home" / f"home.{slot}"
+    slot_root = STATIC_GENERATED_ROOT / "home" / slot
     for size in size_order:
         candidate = slot_root / f"{size}.webp"
         if candidate.exists():
-            return f"{GENERATED_PUBLIC_PREFIX}/home/home.{slot}/{size}.webp"
+            return f"{GENERATED_PUBLIC_PREFIX}/home/{slot}/{size}.webp"
     return None
 
 
@@ -70,7 +71,7 @@ def home_image(key: str) -> str:
     generated = _home_generated(key)
     if generated:
         return generated
-    return HOME_IMAGES_LEGACY.get(key, HOME_IMAGES_LEGACY["hero"])
+    return HOME_IMAGES_LEGACY.get(key, DEFAULT_IMAGE_PLACEHOLDER)
 
 
 def stage_card_image(slug: str | None) -> str:

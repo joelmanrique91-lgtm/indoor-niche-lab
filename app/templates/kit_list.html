@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Kits</h1>
-<img class="kit-hero-image" src="/static/section-images/kits/kits.card.placeholder.v1.svg" alt="Vista general de kits" loading="lazy">
+<img class="kit-hero-image" src="{{ url_for('static', path='section-images/kits/kits.card.placeholder.v1.svg') }}" alt="Vista general de kits" loading="lazy">
 
 <div class="grid">
   {% for kit in kits %}
