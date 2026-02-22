@@ -1,19 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Productos recomendados</h1>
+<img class="catalog-product-image" src="/static/section-images/products/products.card.placeholder.v1.svg" alt="Vista general de productos" loading="lazy">
+
 <div class="grid">
   {% for p in products %}
   <article class="card product-list-card">
     <img
       class="catalog-product-image"
-      src="{{ [
-        '/static/img/generated/product_list-01-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp',
-        '/static/img/generated/product_list-02-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp',
-        '/static/img/generated/product_list-03-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp',
-        '/static/img/generated/product_list-04-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp',
-        '/static/img/generated/product_list-05-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp'
-      ][loop.index0 % 5] }}"
-      alt="Foto real del producto {{ p.name }} sobre fondo neutro"
+      src="{{ p.image_url }}"
+      alt="Foto del producto {{ p.name }} sobre fondo neutro"
       loading="lazy"
     >
     <h2>{{ p.name }}</h2>

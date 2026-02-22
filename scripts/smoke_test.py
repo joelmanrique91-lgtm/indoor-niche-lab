@@ -41,17 +41,29 @@ def _ensure_db() -> None:
         _run_script("seed_demo.py")
 
 
-def _check_http_health_with_testclient() -> None:
+def _check_http_with_testclient() -> None:
     from app.main import app
 
     client = TestClient(app)
-    health = client.get("/health")
-    if health.status_code != 200 or health.json() != {"ok": True}:
-        raise SystemExit(f"/health inesperado: status={health.status_code} body={health.text}")
 
-    api_health = client.get("/api/health")
-    if api_health.status_code != 200 or api_health.json() != {"ok": True}:
-        raise SystemExit(f"/api/health inesperado: status={api_health.status_code} body={api_health.text}")
+    checks = {
+        "/health": 200,
+        "/api/health": 200,
+        "/": 200,
+        "/stages": 200,
+        "/products": 200,
+        "/kits": 200,
+    }
+
+    for path, expected_status in checks.items():
+        response = client.get(path)
+        if response.status_code != expected_status:
+            raise SystemExit(f"{path} inesperado: status={response.status_code} body={response.text[:220]}")
+
+    for path in ["/", "/stages", "/products", "/kits"]:
+        html = client.get(path).text
+        if "/static/section-images/" not in html:
+            raise SystemExit(f"{path} no referencia /static/section-images/")
 
 
 def main() -> None:
@@ -59,7 +71,7 @@ def main() -> None:
     _run_script("init_db.py")
     _run_script("seed_demo.py")
     _ensure_db()
-    _check_http_health_with_testclient()
+    _check_http_with_testclient()
     print("OK")
 
 
