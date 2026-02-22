@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +31,12 @@ def resolve_static_path(section: str, slot: str, size: str = "md") -> str:
     candidate = STATIC_GENERATED_ROOT / section / slot / f"{size}.webp"
     if candidate.exists() and candidate.stat().st_size > 0:
         return f"img/generated/{section}/{slot}/{size}.webp"
+    if os.environ.get("IMAGE_RESOLVER_DEBUG_PLACEHOLDER") == "1":
+        print(
+            "[image_resolver] placeholder fallback "
+            f"section={section} slot={slot} size={size} "
+            f"expected_disk_path={candidate} exists={candidate.exists()}"
+        )
     return PLACEHOLDER_STATIC_PATH
 
 
