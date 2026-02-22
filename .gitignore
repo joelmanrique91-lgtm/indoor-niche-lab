@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .env
 .DS_Store
+
 # SQLite local
 data/*.db
 *.db
@@ -11,10 +12,10 @@ data/*.db
 # Generated AI images (runtime/deploy artifacts, never committed)
 app/static/img/generated/**
 !app/static/img/generated/.gitkeep
-app/static/img/generated/**/*.webp
-app/static/img/generated/**/*.png
-app/static/img/generated/**/*.jpg
+
+# Generated image manifest (local artifact)
+data/generated_images_manifest.json
+
 # Generated section images (runtime artifacts)
 app/static/section-images/**/*.png
 !app/static/section-images/.gitkeep
-

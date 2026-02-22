@@ -81,24 +81,24 @@ Si `OPENAI_API_KEY` no está configurada, el script termina con error controlado
 ---
 
 
-# Generación de imágenes IA (Home, slot-driven)
+# Generación de imágenes IA (slot-driven)
 ```bash
 # modo mock (sin API key)
-python scripts/generate_site_images.py --only home --mock
+python scripts/generate_site_images.py --mock
 
 # modo real (requiere OPENAI_API_KEY)
 export OPENAI_API_KEY=tu_api_key
-python scripts/generate_site_images.py --only home --real
+python scripts/generate_site_images.py --real
 ```
 
 Opcional:
 ```bash
 # regenera incluso si los archivos del slot ya existen
-python scripts/generate_site_images.py --only home --mock --force
+python scripts/generate_site_images.py --mock --force
 ```
 
 El pipeline:
-1. genera assets por slot de Home en `app/static/img/generated/home/<slot>/{sm,md,lg}.webp`,
+1. genera assets por slot para Home/Stages/Kits/Products en `app/static/img/generated/<section>/<slot>/{sm,md,lg}.webp`,
 2. mantiene idempotencia (si existe el slot completo, salta salvo `--force`),
 3. guarda trazabilidad en `data/generated_images_manifest.json` (source of truth),
 4. no modifica templates automáticamente y mantiene fallback a SVG legacy vía resolver.
@@ -154,18 +154,29 @@ $env:OPENAI_API_KEY="tu_api_key"
 python scripts\generate_site_images.py --real --force
 ```
 
-El script genera archivos en: `app/static/img/generated/{section}/{slot}/{size}.webp`
+Bash:
+```bash
+python scripts/generate_site_images.py --real --force
+```
+
+El script genera archivos en: `app/static/img/generated/{section}/{slot}/{size}.webp` para `home`, `stages`, `kits` y `products`.
+
+> Nota: las imágenes generadas y `data/generated_images_manifest.json` son artefactos locales y **no se commitean** al repositorio.
 
 ## Verificar imágenes servidas
 
 Con el server levantado:
 ```powershell
-start http://127.0.0.1:8000/static/img/generated/home/hero/md.webp
 start http://127.0.0.1:8000/debug/static-check
+start http://127.0.0.1:8000/static/img/generated/stages/hero/md.webp
+start http://127.0.0.1:8000/static/img/generated/kits/hero/md.webp
+start http://127.0.0.1:8000/static/img/generated/products/hero/md.webp
 ```
 
-Tambien podés probar por terminal:
+También podés probar por terminal:
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/home/hero/md.webp -Method Head
 Invoke-WebRequest http://127.0.0.1:8000/debug/static-check -Method Get
+Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/stages/hero/md.webp -Method Head
+Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/kits/hero/md.webp -Method Head
+Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/products/hero/md.webp -Method Head
 ```

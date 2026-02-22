@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{ stage.name }}</h1>
-<img class="stage-banner" src="{{ banner_url }}" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
+<img class="stage-banner" src="{{ url_for('static', path=stage_image_path) }}" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
 <p><a href="/stages">← Volver a etapas</a></p>
 
 {% for step in steps %}
 <article class="card stage-step-card">
   <img
     class="stage-step-image"
-    src="{{ banner_url }}"
+    src="{{ url_for('static', path=stage_image_path) }}"
     alt="Miniatura del proceso: {{ step.title }}"
     loading="lazy"
   >

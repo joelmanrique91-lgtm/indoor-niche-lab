@@ -7,14 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from app.repositories import get_stage, list_kits, list_products, list_stages, list_steps_by_stage
-from app.services.image_resolver import (
-    home_image,
-    kit_card_image,
-    product_card_image,
-    slugify,
-    stage_banner_image,
-    stage_card_image,
-)
+from app.services.image_resolver import entity_slot, resolve_static_path
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -22,17 +15,17 @@ templates = Jinja2Templates(directory="app/templates")
 
 def _home_images() -> dict[str, str]:
     return {
-        "home.hero": home_image("hero"),
-        "home.beneficios-1": home_image("beneficios-1"),
-        "home.beneficios-2": home_image("beneficios-2"),
-        "home.beneficios-3": home_image("beneficios-3"),
-        "home.como-funciona-1": home_image("como-funciona-1"),
-        "home.como-funciona-2": home_image("como-funciona-2"),
-        "home.como-funciona-3": home_image("como-funciona-3"),
-        "home.testimonios-1": home_image("testimonios-1"),
-        "home.testimonios-2": home_image("testimonios-2"),
-        "home.testimonios-3": home_image("testimonios-3"),
-        "home.faq": home_image("faq"),
+        "home.hero": resolve_static_path("home", "hero"),
+        "home.beneficios-1": resolve_static_path("home", "beneficios-1"),
+        "home.beneficios-2": resolve_static_path("home", "beneficios-2"),
+        "home.beneficios-3": resolve_static_path("home", "beneficios-3"),
+        "home.como-funciona-1": resolve_static_path("home", "como-funciona-1"),
+        "home.como-funciona-2": resolve_static_path("home", "como-funciona-2"),
+        "home.como-funciona-3": resolve_static_path("home", "como-funciona-3"),
+        "home.testimonios-1": resolve_static_path("home", "testimonios-1"),
+        "home.testimonios-2": resolve_static_path("home", "testimonios-2"),
+        "home.testimonios-3": resolve_static_path("home", "testimonios-3"),
+        "home.faq": resolve_static_path("home", "faq"),
     }
 
 
@@ -50,11 +43,11 @@ def stages(request: Request):
                 "id": stage.id,
                 "name": stage.name,
                 "order_index": stage.order_index,
-                "slug": slugify(stage.name),
-                "image_url": stage_card_image(stage.name),
+                "slot": entity_slot("stage", stage.id, stage.name),
+                "image_path": resolve_static_path("stages", entity_slot("stage", stage.id, stage.name), "md"),
             }
         )
-    return templates.TemplateResponse("stage_list.html", {"request": request, "stages": stage_rows})
+    return templates.TemplateResponse("stage_list.html", {"request": request, "stages": stage_rows, "hero_path": resolve_static_path("stages", "hero", "md")})
 
 
 @router.get("/stages/{stage_id}")
@@ -63,10 +56,15 @@ def stage_detail(stage_id: int, request: Request):
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa no encontrada")
     steps = list_steps_by_stage(stage_id)
-    banner_url = stage_banner_image(stage.name)
+    stage_slot = entity_slot("stage", stage.id, stage.name)
     return templates.TemplateResponse(
         "stage_detail.html",
-        {"request": request, "stage": stage, "steps": steps, "banner_url": banner_url},
+        {
+            "request": request,
+            "stage": stage,
+            "steps": steps,
+            "stage_image_path": resolve_static_path("stages", stage_slot, "lg"),
+        },
     )
 
 
@@ -82,11 +80,11 @@ def products(request: Request):
                 "price": product.price,
                 "affiliate_url": product.affiliate_url,
                 "internal_product": product.internal_product,
-                "slug": slugify(product.name),
-                "image_url": product_card_image(product.name),
+                "slot": entity_slot("product", product.id, product.name),
+                "image_path": resolve_static_path("products", entity_slot("product", product.id, product.name), "md"),
             }
         )
-    return templates.TemplateResponse("product_list.html", {"request": request, "products": product_rows})
+    return templates.TemplateResponse("product_list.html", {"request": request, "products": product_rows, "hero_path": resolve_static_path("products", "hero", "md")})
 
 
 @router.get("/kits")
@@ -100,11 +98,12 @@ def kits(request: Request):
                 "description": kit.description,
                 "price": kit.price,
                 "components_json": kit.components_json,
-                "slug": slugify(kit.name),
-                "image_url": kit_card_image(kit.name),
+                "slot": entity_slot("kit", kit.id, kit.name),
+                "image_path": resolve_static_path("kits", entity_slot("kit", kit.id, kit.name), "md"),
+                "result_image_path": resolve_static_path("kits", entity_slot("kit-result", kit.id, kit.name), "md"),
             }
         )
-    return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows})
+    return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows, "hero_path": resolve_static_path("kits", "hero", "md")})
 
 
 @router.get("/debug/static-check")
