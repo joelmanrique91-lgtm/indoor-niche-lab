@@ -35,6 +35,7 @@ class SlotSpec:
     alt: str
     prompt: str
     source_template: str
+    sizes: tuple[str, ...]
 
     @property
     def slot_key(self) -> str:
@@ -42,17 +43,17 @@ class SlotSpec:
 
 
 HOME_SLOTS: list[SlotSpec] = [
-    SlotSpec("home", "hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto.", "app/templates/home.html"),
-    SlotSpec("home", "beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos.", "app/templates/home.html"),
-    SlotSpec("home", "beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida.", "app/templates/home.html"),
-    SlotSpec("home", "beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla.", "app/templates/home.html"),
-    SlotSpec("home", "como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural.", "app/templates/home.html"),
-    SlotSpec("home", "como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural.", "app/templates/home.html"),
-    SlotSpec("home", "como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida.", "app/templates/home.html"),
-    SlotSpec("home", "testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones.", "app/templates/home.html"),
-    SlotSpec("home", "testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro.", "app/templates/home.html"),
-    SlotSpec("home", "testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio.", "app/templates/home.html"),
-    SlotSpec("home", "faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural.", "app/templates/home.html"),
+    SlotSpec("home", "hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio.", "app/templates/home.html", ("sm", "md", "lg")),
+    SlotSpec("home", "faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
 ]
 
 SIZES = {"sm": (640, 426), "md": (1024, 683), "lg": (1536, 1024)}
@@ -60,9 +61,9 @@ SIZES = {"sm": (640, 426), "md": (1024, 683), "lg": (1536, 1024)}
 
 def _dynamic_slots() -> list[SlotSpec]:
     slots: list[SlotSpec] = [
-        SlotSpec("stages", "hero", "Portada de etapas de cultivo de hongos gourmet", "Fotografía realista de una secuencia de cultivo indoor de hongos gourmet, ambiente limpio, luz natural y estética editorial premium.", "app/templates/stage_list.html"),
-        SlotSpec("kits", "hero", "Portada de kits de cultivo indoor", "Fotografía realista de kits de cultivo de hongos gourmet alineados sobre mesa de trabajo, iluminación cálida, estilo e-commerce premium.", "app/templates/kit_list.html"),
-        SlotSpec("products", "hero", "Portada de productos para cultivo indoor", "Fotografía realista de productos e insumos de cultivo indoor organizados en composición de catálogo sobre fondo neutro.", "app/templates/product_list.html"),
+        SlotSpec("stages", "hero", "Portada de etapas de cultivo de hongos gourmet", "Fotografía realista de una secuencia de cultivo indoor de hongos gourmet, ambiente limpio, luz natural y estética editorial premium.", "app/templates/stage_list.html", ("sm", "md", "lg")),
+        SlotSpec("kits", "hero", "Portada de kits de cultivo indoor", "Fotografía realista de kits de cultivo de hongos gourmet alineados sobre mesa de trabajo, iluminación cálida, estilo e-commerce premium.", "app/templates/kit_list.html", ("sm", "md", "lg")),
+        SlotSpec("products", "hero", "Portada de productos para cultivo indoor", "Fotografía realista de productos e insumos de cultivo indoor organizados en composición de catálogo sobre fondo neutro.", "app/templates/product_list.html", ("sm", "md", "lg")),
     ]
 
     for stage in list_stages():
@@ -74,6 +75,7 @@ def _dynamic_slots() -> list[SlotSpec]:
                 f"Imagen de la etapa {stage.name}",
                 f"Fotografía realista de la etapa '{stage.name}' del cultivo de hongos gourmet, contexto doméstico controlado, luz natural y enfoque detallado.",
                 "app/templates/stage_list.html",
+                ("md", "lg"),
             )
         )
 
@@ -86,15 +88,7 @@ def _dynamic_slots() -> list[SlotSpec]:
                 f"Kit {kit.name} en entorno real",
                 f"Fotografía realista del kit '{kit.name}' para cultivo indoor de hongos gourmet sobre superficie de cocina limpia, luz natural, estilo de catálogo.",
                 "app/templates/kit_list.html",
-            )
-        )
-        slots.append(
-            SlotSpec(
-                "kits",
-                entity_slot("kit-result", kit.id, kit.name),
-                f"Resultado de cosecha del kit {kit.name}",
-                f"Fotografía realista de resultado final de cosecha obtenido con el kit '{kit.name}', hongos gourmet frescos en plato de cocina, sin texto.",
-                "app/templates/kit_list.html",
+                ("md",),
             )
         )
 
@@ -106,6 +100,7 @@ def _dynamic_slots() -> list[SlotSpec]:
                 f"Producto {product.name}",
                 f"Fotografía realista del producto '{product.name}' para cultivo indoor de hongos gourmet, toma tipo e-commerce con fondo neutro y luz de estudio suave.",
                 "app/templates/product_list.html",
+                ("md",),
             )
         )
 
@@ -123,13 +118,13 @@ def _slot_dir(section: str, slot: str) -> Path:
     return OUTPUT_ROOT / section / slot
 
 
-def _output_files(section: str, slot: str) -> dict[str, Path]:
+def _output_files(section: str, slot: str, sizes: tuple[str, ...]) -> dict[str, Path]:
     base = _slot_dir(section, slot)
-    return {k: base / f"{k}.webp" for k in SIZES}
+    return {k: base / f"{k}.webp" for k in sizes}
 
 
-def _is_complete(section: str, slot: str) -> bool:
-    return all(path.exists() and path.stat().st_size > 0 for path in _output_files(section, slot).values())
+def _is_complete(section: str, slot: str, sizes: tuple[str, ...]) -> bool:
+    return all(path.exists() and path.stat().st_size > 0 for path in _output_files(section, slot, sizes).values())
 
 
 def _generate_real_png(client, prompt: str) -> bytes:
@@ -152,13 +147,14 @@ def _generate_mock_png(slot: str, prompt: str) -> bytes:
     return buf.getvalue()
 
 
-def _save_webp_variants(png_bytes: bytes, section: str, slot: str) -> dict[str, str]:
-    out = _output_files(section, slot)
+def _save_webp_variants(png_bytes: bytes, section: str, slot: str, sizes: tuple[str, ...]) -> dict[str, str]:
+    out = _output_files(section, slot, sizes)
     out[next(iter(out))].parent.mkdir(parents=True, exist_ok=True)
     with Image.open(BytesIO(png_bytes)) as image:
         source = image.convert("RGB")
         public: dict[str, str] = {}
-        for size_name, dims in SIZES.items():
+        for size_name in sizes:
+            dims = SIZES[size_name]
             variant = source.resize(dims, Image.Resampling.LANCZOS)
             variant.save(out[size_name], format="WEBP", quality=82, method=6)
             public[size_name] = str(out[size_name].relative_to(ROOT))
@@ -322,13 +318,13 @@ def generate_slots(slots: list[SlotSpec], mock: bool, force: bool) -> tuple[dict
     stale_set = set(stale_slots)
 
     for spec in slots:
-        files = _output_files(spec.section, spec.slot)
+        files = _output_files(spec.section, spec.slot, spec.sizes)
         slot_key = spec.slot_key
         output_dir = files["md"].parent
         prompt_preview = spec.prompt.replace("\n", " ")[:120]
 
         try:
-            is_complete = _is_complete(spec.section, spec.slot)
+            is_complete = _is_complete(spec.section, spec.slot, spec.sizes)
             if is_complete and not force:
                 status = "skipped-existing"
                 counters[status] += 1
@@ -353,7 +349,7 @@ def generate_slots(slots: list[SlotSpec], mock: bool, force: bool) -> tuple[dict
             print(f"[images] Generando imagen para sección: {slot_key}")
             print(f"[images] Guardando en: {output_dir}")
             png = _generate_mock_png(slot_key, spec.prompt) if mock else _generate_real_png(client, spec.prompt)
-            saved = _save_webp_variants(png, spec.section, spec.slot)
+            saved = _save_webp_variants(png, spec.section, spec.slot, spec.sizes)
 
             status = "regenerated-stale" if stale else "generated"
             counters[status] += 1
