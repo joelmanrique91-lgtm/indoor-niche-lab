@@ -508,3 +508,162 @@ button:focus-visible {
 
 .spin { animation: spin 0.9s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.nav-item {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+}
+
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.nav-item.section-beneficios,
+.nav-item.section-como-funciona,
+.nav-item.section-testimonios,
+.nav-item.section-faq {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-primary-action {
+  background: var(--color-accent-primary);
+  color: #fff;
+}
+
+.btn-secondary-action {
+  background: #fff3e0;
+  color: #8f5000;
+  border: 1px solid #f8d6a8;
+}
+
+.btn-secondary-action:hover {
+  background: #ffe9cd;
+  color: #733f00;
+}
+
+.btn-disabled,
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.actions .btn,
+.hero-actions .btn,
+.section-cta {
+  margin-top: 0.35rem;
+}
+
+.trust-badge {
+  background: #eef8fb;
+  border: 1px solid #cde8f2;
+  color: #0d556d;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.footer-links a {
+  text-decoration: underline;
+  text-underline-offset: 0.15rem;
+}
+
+.footer-links a:hover {
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #1f9ac0;
+  outline-offset: 2px;
+}
+
+.section[id] {
+  scroll-margin-top: 84px;
+}
+
+.faq-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-top: 0.8rem;
+}
+
+.faq-trigger {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0.9rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.faq-panel {
+  padding: 0 1rem 1rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+
+.faq-panel.is-open {
+  max-height: 220px;
+}
+
+.form-error {
+  min-height: 1.2rem;
+  margin: 0;
+  color: #bb3045;
+  font-size: 0.92rem;
+}
+
+.affiliate-badge {
+  margin-left: 0.35rem;
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+}

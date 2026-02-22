@@ -3,14 +3,14 @@
 <h1>Admin</h1>
 {% if message %}<p class="notice">{{ message }}</p>{% endif %}
 <div class="actions">
-  <form method="post" action="/admin/init-db" class="async-action-form">
+  <form method="post" action="/admin/init-db" class="async-action-form" data-no-redirect="true">
     <button class="btn icon-btn" type="submit">
       <img src="/static/assets/icons/database.svg" alt="" width="20" height="20" />
       <span>Inicializar DB</span>
     </button>
     <span class="action-status" aria-live="polite"></span>
   </form>
-  <form method="post" action="/admin/seed-demo" class="async-action-form">
+  <form method="post" action="/admin/seed-demo" class="async-action-form" data-no-redirect="true">
     <button class="btn icon-btn" type="submit">
       <img src="/static/assets/icons/upload.svg" alt="" width="20" height="20" />
       <span>Cargar demo</span>
@@ -22,7 +22,7 @@
 <h2>Generar contenido IA por etapa</h2>
 <div class="grid admin-stage-grid">
 {% for stage in stages %}
-  <form method="post" action="/admin/generate/{{ stage.id }}" class="card stage-generate-card async-action-form">
+  <form method="post" action="/admin/generate/{{ stage.id }}" class="card stage-generate-card async-action-form" data-no-redirect="true">
     <img class="stage-thumb" src="{{ stage_illustration(stage.name) }}" alt="Ilustración de la etapa {{ stage.name }}" width="48" height="48" />
     <div>
       <p><strong>{{ stage.order_index }}. {{ stage.name }}</strong></p>

@@ -2,35 +2,35 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title or 'Indoor Niche Lab' }}</title>
   <link rel="icon" type="image/svg+xml" href="/static/assets/favicon.svg" />
   <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
-<body>
+<body data-path="{{ request.url.path }}">
   <header class="topbar">
-    <a href="/" class="brand nav-item" aria-label="Ir al inicio de Indoor Niche Lab">
+    <a href="/" class="brand nav-item" aria-label="Ir al inicio de Indoor Niche Lab" data-nav-root="/">
       <img src="/static/assets/logo.svg" class="brand-logo" alt="Logo de Indoor Niche Lab" width="28" height="28" />
       <span>Indoor Niche Lab</span>
     </a>
     <nav aria-label="Navegación principal">
-      <a href="/" class="nav-item" aria-label="Inicio">
+      <a href="/" class="nav-item" aria-label="Inicio" data-nav-root="/" data-home-nav>
         <img src="/static/assets/icons/home.svg" alt="" width="20" height="20" />
         <span>Inicio</span>
       </a>
-      <a href="/stages" class="nav-item" aria-label="Etapas">
+      <a href="/stages" class="nav-item" aria-label="Etapas" data-nav-root="/stages">
         <img src="/static/assets/icons/stages.svg" alt="" width="20" height="20" />
         <span>Etapas</span>
       </a>
-      <a href="/products" class="nav-item" aria-label="Productos">
+      <a href="/products" class="nav-item" aria-label="Productos" data-nav-root="/products">
         <img src="/static/assets/icons/products.svg" alt="" width="20" height="20" />
         <span>Productos</span>
       </a>
-      <a href="/kits" class="nav-item" aria-label="Kits">
+      <a href="/kits" class="nav-item" aria-label="Kits" data-nav-root="/kits">
         <img src="/static/assets/icons/kits.svg" alt="" width="20" height="20" />
         <span>Kits</span>
       </a>
-      <a href="/admin" class="nav-item" aria-label="Administración">
+      <a href="/admin" class="nav-item" aria-label="Administración" data-nav-root="/admin">
         <img src="/static/assets/icons/admin.svg" alt="" width="20" height="20" />
         <span>Admin</span>
       </a>

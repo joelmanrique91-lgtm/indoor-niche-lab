@@ -3,27 +3,37 @@
 <h1>Editor simple</h1>
 <section class="card">
   <h2>Crear o editar etapa</h2>
-  <form method="post" action="/admin/editor/stage" class="stack">
-    <input type="number" name="stage_id" placeholder="ID (opcional para editar)" />
-    <input type="text" name="name" placeholder="Nombre de etapa" required />
-    <input type="number" name="order_index" placeholder="Orden" required />
+  <form method="post" action="/admin/editor/stage" class="stack" data-validate-form>
+    <label for="stage_id">ID (opcional para editar)</label>
+    <input id="stage_id" type="number" name="stage_id" placeholder="ID (opcional para editar)" />
+    <label for="stage_name">Nombre de etapa</label>
+    <input id="stage_name" type="text" name="name" placeholder="Nombre de etapa" required />
+    <label for="stage_order">Orden</label>
+    <input id="stage_order" type="number" name="order_index" placeholder="Orden" required />
+    <p class="form-error" data-form-error aria-live="polite"></p>
     <button class="btn" type="submit">Guardar etapa</button>
   </form>
 </section>
 
 <section class="card">
   <h2>Agregar paso</h2>
-  <form method="post" action="/admin/editor/step" class="stack">
-    <select name="stage_id" required>
+  <form method="post" action="/admin/editor/step" class="stack" data-validate-form>
+    <label for="step_stage">Etapa</label>
+    <select id="step_stage" name="stage_id" required>
       <option value="">Elegí etapa</option>
       {% for stage in stages %}
       <option value="{{ stage.id }}">{{ stage.order_index }}. {{ stage.name }}</option>
       {% endfor %}
     </select>
-    <input type="text" name="title" placeholder="Título del paso" required />
-    <textarea name="content" placeholder="Contenido del paso" required></textarea>
-    <input type="text" name="tools_csv" placeholder="Materiales separados por coma" />
-    <input type="number" step="0.01" name="estimated_cost_usd" placeholder="Costo estimado USD" />
+    <label for="step_title">Nombre del paso</label>
+    <input id="step_title" type="text" name="title" placeholder="Título del paso" required />
+    <label for="step_content">Objetivo</label>
+    <textarea id="step_content" name="content" placeholder="Contenido del paso" required></textarea>
+    <label for="step_tools">Materiales separados por coma</label>
+    <input id="step_tools" type="text" name="tools_csv" placeholder="Materiales separados por coma" />
+    <label for="step_cost">Costo estimado USD</label>
+    <input id="step_cost" type="number" step="0.01" min="0" name="estimated_cost_usd" placeholder="Costo estimado USD" />
+    <p class="form-error" data-form-error aria-live="polite"></p>
     <button class="btn" type="submit">Agregar paso</button>
   </form>
 </section>
