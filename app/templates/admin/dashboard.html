@@ -20,7 +20,7 @@
     <p><strong>Cuándo usarlo:</strong> antes de una demo nueva o si la DB quedó inconsistente.</p>
     <form method="post" action="/admin/init-db" class="async-action-form" data-no-redirect="true">
       <button class="btn icon-btn" type="submit">
-        <img src="/static/assets/icons/database.svg" alt="" width="20" height="20" />
+        <img src="{{ url_for('static', path='assets/icons/database.svg') }}" alt="" width="20" height="20" />
         <span>Inicializar DB</span>
       </button>
       <span class="action-status" aria-live="polite"></span>
@@ -33,7 +33,7 @@
     <p><strong>Cuándo usarlo:</strong> luego de inicializar DB para tener contenido visible de inmediato.</p>
     <form method="post" action="/admin/seed-demo" class="async-action-form" data-no-redirect="true">
       <button class="btn icon-btn" type="submit">
-        <img src="/static/assets/icons/upload.svg" alt="" width="20" height="20" />
+        <img src="{{ url_for('static', path='assets/icons/upload.svg') }}" alt="" width="20" height="20" />
         <span>Cargar demo</span>
       </button>
       <span class="action-status" aria-live="polite"></span>
@@ -51,7 +51,7 @@
       <div>
         <p><strong>{{ stage.order_index }}. {{ stage.name }}</strong></p>
         <button class="btn btn-secondary icon-btn" type="submit">
-          <img src="/static/assets/icons/ai.svg" alt="" width="20" height="20" />
+          <img src="{{ url_for('static', path='assets/icons/ai.svg') }}" alt="" width="20" height="20" />
           <span>Generar con IA</span>
         </button>
         <span class="action-status" aria-live="polite"></span>
@@ -67,7 +67,7 @@
   <h2>Editor manual</h2>
   <p>Editar etapas y pasos manualmente (nombres, checklist, materiales, costos, imágenes).</p>
   <a href="/admin/editor" class="admin-editor-link">
-    <img src="/static/assets/icons/edit.svg" alt="" width="20" height="20" />
+    <img src="{{ url_for('static', path='assets/icons/edit.svg') }}" alt="" width="20" height="20" />
     <span>Ir al editor de etapas y pasos</span>
   </a>
 </section>
