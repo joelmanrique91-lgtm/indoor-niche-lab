@@ -106,26 +106,39 @@ def _check_home_render_and_images() -> None:
 
 
 def _check_stage_product_coverage() -> None:
-    from app.repositories import list_products, list_stages
+    from app.repositories import list_kits, list_products, list_stages
     from app.services.image_resolver import entity_slot, resolve_static_path, PLACEHOLDER_STATIC_PATH
 
     missing: list[str] = []
 
     for stage in list_stages():
         slot = entity_slot("stage", stage.id, stage.name)
-        resolved = resolve_static_path("stages", slot, "md")
-        if resolved == PLACEHOLDER_STATIC_PATH:
-            missing.append(f"stage id={stage.id} slot={slot} size=md")
+        resolved_md = resolve_static_path("stages", slot, "md")
+        resolved_lg = resolve_static_path("stages", slot, "lg")
+        if resolved_md == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"section=stages slot={slot} size=md entity=stage:{stage.id}")
+        if resolved_lg == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"section=stages slot={slot} size=lg entity=stage:{stage.id}")
 
     for product in list_products():
         slot = entity_slot("product", product.id, product.name)
         resolved = resolve_static_path("products", slot, "md")
         if resolved == PLACEHOLDER_STATIC_PATH:
-            missing.append(f"product id={product.id} slot={slot} size=md")
+            missing.append(f"section=products slot={slot} size=md entity=product:{product.id}")
+
+    for kit in list_kits():
+        slot = entity_slot("kit", kit.id, kit.name)
+        result_slot = entity_slot("kit-result", kit.id, kit.name)
+        resolved_kit = resolve_static_path("kits", slot, "md")
+        resolved_result = resolve_static_path("kits", result_slot, "md")
+        if resolved_kit == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"section=kits slot={slot} size=md entity=kit:{kit.id}")
+        if resolved_result == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"section=kits slot={result_slot} size=md entity=kit-result:{kit.id}")
 
     if missing:
         lines = "\n - ".join(missing)
-        raise SystemExit(f"Cobertura de imágenes incompleta; resolver cae en placeholder:\n - {lines}")
+        raise SystemExit(f"Cobertura de imágenes incompleta; faltan assets esperados:\n - {lines}")
 
 
 def main() -> None:

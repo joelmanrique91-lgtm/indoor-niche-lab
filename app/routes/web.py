@@ -109,14 +109,22 @@ def kits(request: Request):
 @router.get("/debug/static-check")
 def debug_static_check(request: Request):
     generated_root = Path("app/static/img/generated")
+    sections = ["home", "stages", "products", "kits"]
     files = []
     total_bytes = 0
+    section_counts = {section: 0 for section in sections}
+    section_bytes = {section: 0 for section in sections}
     if generated_root.exists():
         for path in sorted(generated_root.rglob("*")):
             if not path.is_file():
                 continue
             size = path.stat().st_size
             rel = path.relative_to(Path("app/static")).as_posix()
+            parts = rel.split("/")
+            if len(parts) >= 3 and parts[0] == "img" and parts[1] == "generated" and parts[2] in section_counts:
+                section = parts[2]
+                section_counts[section] += 1
+                section_bytes[section] += size
             files.append({
                 "relative": rel,
                 "size": size,
@@ -124,13 +132,78 @@ def debug_static_check(request: Request):
             })
             total_bytes += size
 
+    expected_examples: list[dict[str, str]] = []
+    stages_rows = list_stages()
+    product_rows = list_products()
+    kit_rows = list_kits()
+
+    if stages_rows:
+        stage = stages_rows[0]
+        stage_slot = entity_slot("stage", stage.id, stage.name)
+        expected_examples.extend(
+            [
+                {"label": f"stage:{stage.id} md", "path": f"img/generated/stages/{stage_slot}/md.webp"},
+                {"label": f"stage:{stage.id} lg", "path": f"img/generated/stages/{stage_slot}/lg.webp"},
+            ]
+        )
+    if product_rows:
+        product = product_rows[0]
+        product_slot = entity_slot("product", product.id, product.name)
+        expected_examples.append({"label": f"product:{product.id} md", "path": f"img/generated/products/{product_slot}/md.webp"})
+    if kit_rows:
+        kit = kit_rows[0]
+        kit_slot = entity_slot("kit", kit.id, kit.name)
+        kit_result_slot = entity_slot("kit-result", kit.id, kit.name)
+        expected_examples.extend(
+            [
+                {"label": f"kit:{kit.id} md", "path": f"img/generated/kits/{kit_slot}/md.webp"},
+                {"label": f"kit-result:{kit.id} md", "path": f"img/generated/kits/{kit_result_slot}/md.webp"},
+            ]
+        )
+
+    missing_sections = [section for section in sections if section_counts.get(section, 0) == 0]
+
     html_parts = [
         "<html><body>",
         "<h1>Debug static check</h1>",
         f"<p>Total archivos: {len(files)}</p>",
         f"<p>Total bytes: {total_bytes}</p>",
+        "<h2>Conteo por sección</h2>",
         "<ul>",
     ]
+    for section in sections:
+        html_parts.append(f"<li><strong>{section}</strong>: {section_counts[section]} archivos, {section_bytes[section]} bytes</li>")
+
+    html_parts.append("</ul>")
+    if missing_sections:
+        html_parts.append(f"<p style='color:#b91c1c;'><strong>ALERTA:</strong> secciones sin archivos: {', '.join(missing_sections)}</p>")
+
+    html_parts.extend([
+        "<h2>Expected examples (DB-derived)</h2>",
+        "<ul>",
+    ])
+    if expected_examples:
+        for item in expected_examples:
+            rel_path = item["path"]
+            abs_path = Path("app/static") / rel_path
+            exists = abs_path.exists() and abs_path.stat().st_size > 0
+            status = "EXISTS" if exists else "MISSING"
+            color = "#166534" if exists else "#b91c1c"
+            url = str(request.url_for("static", path=rel_path))
+            html_parts.append(
+                f"<li><strong>{item['label']}</strong>: <code>{rel_path}</code> "
+                f"<span style='color:{color};font-weight:bold;'>{status}</span> "
+                f"<a href='{url}' target='_blank'>open</a></li>"
+            )
+    else:
+        html_parts.append("<li>Sin entidades en DB para construir ejemplos esperados.</li>")
+
+    html_parts.extend([
+        "</ul>",
+        "<h2>Archivos detectados</h2>",
+        "<ul>",
+    ])
+
     for item in files:
         url = str(item["url"])
         html_parts.append(

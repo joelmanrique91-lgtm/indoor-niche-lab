@@ -214,3 +214,24 @@ start http://127.0.0.1:8000/products
 # ejemplo directo (reemplazar <slot>)
 start http://127.0.0.1:8000/static/img/generated/stages/<slot>/md.webp
 ```
+
+
+## Run E2E Images
+
+PowerShell (copy/paste):
+```powershell
+python scripts\init_db.py
+python scripts\seed_demo.py
+$env:OPENAI_API_KEY="..."
+python scripts\generate_site_images.py --real --force
+powershell -ExecutionPolicy Bypass -File .\scripts\run_local.ps1
+python scripts\audit_rendered_img_srcs.py
+```
+
+Abrir y validar:
+- `/debug/static-check`
+- `/stages`
+- `/products`
+- `/kits`
+- `/stages/1` (o el id real que exista)
+
