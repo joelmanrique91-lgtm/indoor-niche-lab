@@ -1,41 +1,156 @@
-{
-  "app/templates/home.html": {
-    "/static/img/generated/home-01-persona-cosechando-hongos-gourmet-frescos-en-una-cocina-de-hogar-lg.webp": "/static/img/generated/home-01-persona-cosechando-hongos-gourmet-frescos-en-una-cocina-de-hogar-lg.webp",
-    "/static/img/generated/home-02-kit-de-cultivo-indoor-listo-para-comenzar-sobre-mesa-de-trabajo-lg.webp": "/static/img/generated/home-02-kit-de-cultivo-indoor-listo-para-comenzar-sobre-mesa-de-trabajo-lg.webp",
-    "/static/img/generated/home-03-cosecha-abundante-de-hongos-gourmet-reci-n-cortados-lg.webp": "/static/img/generated/home-03-cosecha-abundante-de-hongos-gourmet-reci-n-cortados-lg.webp",
-    "/static/img/generated/home-04-persona-recibiendo-asesor-a-de-soporte-para-cultivo-por-mensaje-lg.webp": "/static/img/generated/home-04-persona-recibiendo-asesor-a-de-soporte-para-cultivo-por-mensaje-lg.webp",
-    "/static/img/generated/home-05-entrega-de-kit-de-cultivo-listo-para-abrir-en-el-hogar-lg.webp": "/static/img/generated/home-05-entrega-de-kit-de-cultivo-listo-para-abrir-en-el-hogar-lg.webp",
-    "/static/img/generated/home-06-seguimiento-de-checklist-de-cultivo-en-una-gu-a-impresa-lg.webp": "/static/img/generated/home-06-seguimiento-de-checklist-de-cultivo-en-una-gu-a-impresa-lg.webp",
-    "/static/img/generated/home-07-resultado-final-de-hongos-gourmet-cosechados-en-cocina-lg.webp": "/static/img/generated/home-07-resultado-final-de-hongos-gourmet-cosechados-en-cocina-lg.webp",
-    "/static/img/generated/home-08-foto-de-andrea-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-08-foto-de-andrea-cliente-de-indoor-niche-lab-lg.webp",
-    "/static/img/generated/home-09-foto-de-mart-n-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-09-foto-de-mart-n-cliente-de-indoor-niche-lab-lg.webp",
-    "/static/img/generated/home-10-foto-de-luc-a-cliente-de-indoor-niche-lab-lg.webp": "/static/img/generated/home-10-foto-de-luc-a-cliente-de-indoor-niche-lab-lg.webp"
+[
+  {
+    "slot": "home.beneficios-1",
+    "prompt": "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos.",
+    "alt": "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.961956+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.beneficios-1/sm.webp",
+      "md": "app/static/img/generated/home/home.beneficios-1/md.webp",
+      "lg": "app/static/img/generated/home/home.beneficios-1/lg.webp"
+    },
+    "status": "skipped-existing"
   },
-  "app/templates/kit_list.html": {
-    "/static/img/generated/kit_list-01-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp": "/static/img/generated/kit_list-01-precio-usd-componentes-no-hay-kits-disponibles-lg.webp",
-    "/static/img/generated/kit_list-02-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp": "/static/img/generated/kit_list-02-kit-completo-kit-name-en-entorno-real-con-iluminaci-n-natural-lg.webp",
-    "/static/img/generated/kit_list-03-resultado-final-de-cosecha-del-kit-name-lg.webp": "/static/img/generated/kit_list-03-resultado-final-de-cosecha-del-kit-name-lg.webp",
-    "/static/img/generated/kit_list-04-resultado-final-de-cosecha-del-kit-name-lg.webp": "/static/img/generated/kit_list-04-resultado-final-de-cosecha-del-kit-name-lg.webp"
+  {
+    "slot": "home.beneficios-2",
+    "prompt": "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida.",
+    "alt": "Cosecha abundante de hongos gourmet recién cortados",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.962220+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.beneficios-2/sm.webp",
+      "md": "app/static/img/generated/home/home.beneficios-2/md.webp",
+      "lg": "app/static/img/generated/home/home.beneficios-2/lg.webp"
+    },
+    "status": "skipped-existing"
   },
-  "app/templates/product_list.html": {
-    "/static/img/generated/product_list-01-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-01-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
-    "/static/img/generated/product_list-02-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-02-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
-    "/static/img/generated/product_list-03-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-03-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
-    "/static/img/generated/product_list-04-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-04-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp",
-    "/static/img/generated/product_list-05-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp": "/static/img/generated/product_list-05-categor-a-precio-usd-tipo-ver-producto-no-hay-productos-cargados-lg.webp"
+  {
+    "slot": "home.beneficios-3",
+    "prompt": "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla.",
+    "alt": "Persona recibiendo asesoría de soporte para cultivo por mensaje",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.962473+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.beneficios-3/sm.webp",
+      "md": "app/static/img/generated/home/home.beneficios-3/md.webp",
+      "lg": "app/static/img/generated/home/home.beneficios-3/lg.webp"
+    },
+    "status": "skipped-existing"
   },
-  "app/templates/stage_detail.html": {
-    "/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp": "/static/img/generated/stage_detail-01-proceso-real-de-hidrataci-n-y-pasteurizaci-n-del-sustrato-lg.webp",
-    "/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp": "/static/img/generated/stage_detail-02-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp",
-    "/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp": "/static/img/generated/stage_detail-03-incubaci-n-del-cultivo-en-ambiente-controlado-lg.webp",
-    "/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-04-materiales-costo-estimado-usd-lg.webp",
-    "/static/img/generated/stage_detail-05-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-05-miniatura-del-proceso-step-title-lg.webp",
-    "/static/img/generated/stage_detail-06-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-06-miniatura-del-proceso-step-title-lg.webp",
-    "/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp": "/static/img/generated/stage_detail-07-materiales-costo-estimado-usd-lg.webp"
+  {
+    "slot": "home.como-funciona-1",
+    "prompt": "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural.",
+    "alt": "Entrega de kit de cultivo listo para abrir en el hogar",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.962802+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.como-funciona-1/sm.webp",
+      "md": "app/static/img/generated/home/home.como-funciona-1/md.webp",
+      "lg": "app/static/img/generated/home/home.como-funciona-1/lg.webp"
+    },
+    "status": "skipped-existing"
   },
-  "app/templates/stage_list.html": {
-    "/static/img/generated/stage_list-01-section-lg.webp": "/static/img/generated/stage_list-01-imagen-representativa-de-la-etapa-stage-name-lg.webp",
-    "/static/img/generated/stage_list-02-imagen-representativa-de-la-etapa-stage-name-lg.webp": "/static/img/generated/stage_list-02-imagen-representativa-de-la-etapa-stage-name-lg.webp",
-    "/static/img/generated/stage_list-03-section-lg.webp": "/static/img/generated/stage_list-03-imagen-representativa-de-la-etapa-stage-name-lg.webp"
+  {
+    "slot": "home.como-funciona-2",
+    "prompt": "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural.",
+    "alt": "Seguimiento de checklist de cultivo en una guía impresa",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.963060+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.como-funciona-2/sm.webp",
+      "md": "app/static/img/generated/home/home.como-funciona-2/md.webp",
+      "lg": "app/static/img/generated/home/home.como-funciona-2/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.como-funciona-3",
+    "prompt": "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida.",
+    "alt": "Resultado final de hongos gourmet cosechados en cocina",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.963310+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.como-funciona-3/sm.webp",
+      "md": "app/static/img/generated/home/home.como-funciona-3/md.webp",
+      "lg": "app/static/img/generated/home/home.como-funciona-3/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.faq",
+    "prompt": "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural.",
+    "alt": "Mesa limpia de soporte y preguntas frecuentes",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.964398+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.faq/sm.webp",
+      "md": "app/static/img/generated/home/home.faq/md.webp",
+      "lg": "app/static/img/generated/home/home.faq/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.hero",
+    "prompt": "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto.",
+    "alt": "Persona cosechando hongos gourmet frescos en una cocina de hogar",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.961597+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.hero/sm.webp",
+      "md": "app/static/img/generated/home/home.hero/md.webp",
+      "lg": "app/static/img/generated/home/home.hero/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.testimonios-1",
+    "prompt": "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones.",
+    "alt": "Foto de Andrea cliente de Indoor Niche Lab",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.963562+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.testimonios-1/sm.webp",
+      "md": "app/static/img/generated/home/home.testimonios-1/md.webp",
+      "lg": "app/static/img/generated/home/home.testimonios-1/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.testimonios-2",
+    "prompt": "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro.",
+    "alt": "Foto de Martín cliente de Indoor Niche Lab",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.963854+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.testimonios-2/sm.webp",
+      "md": "app/static/img/generated/home/home.testimonios-2/md.webp",
+      "lg": "app/static/img/generated/home/home.testimonios-2/lg.webp"
+    },
+    "status": "skipped-existing"
+  },
+  {
+    "slot": "home.testimonios-3",
+    "prompt": "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio.",
+    "alt": "Foto de Lucía cliente de Indoor Niche Lab",
+    "model": "mock",
+    "created_at": "2026-02-22T04:01:54.964126+00:00",
+    "source_template": "app/templates/home.html",
+    "output_files": {
+      "sm": "app/static/img/generated/home/home.testimonios-3/sm.webp",
+      "md": "app/static/img/generated/home/home.testimonios-3/md.webp",
+      "lg": "app/static/img/generated/home/home.testimonios-3/lg.webp"
+    },
+    "status": "skipped-existing"
   }
-}
+]

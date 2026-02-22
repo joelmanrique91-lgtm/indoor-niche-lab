@@ -23,8 +23,12 @@ def _home_images() -> dict[str, str]:
         "home.beneficios-1": home_image("beneficios-1"),
         "home.beneficios-2": home_image("beneficios-2"),
         "home.beneficios-3": home_image("beneficios-3"),
-        "home.como-funciona": home_image("como-funciona"),
-        "home.testimonios": home_image("testimonios"),
+        "home.como-funciona-1": home_image("como-funciona-1"),
+        "home.como-funciona-2": home_image("como-funciona-2"),
+        "home.como-funciona-3": home_image("como-funciona-3"),
+        "home.testimonios-1": home_image("testimonios-1"),
+        "home.testimonios-2": home_image("testimonios-2"),
+        "home.testimonios-3": home_image("testimonios-3"),
         "home.faq": home_image("faq"),
     }
 

@@ -5,237 +5,181 @@ import argparse
 import base64
 import json
 import os
-import re
-import textwrap
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 
-from openai import OpenAI
 from PIL import Image, ImageDraw
 
-BASE_STYLE_PROMPT = (
-    "Fotografía realista de producto o escena relacionada con el contenido de la sección, "
-    "iluminación natural, enfoque nítido, fondo neutro, estilo de catálogo profesional, "
-    "alta resolución, coherencia visual entre todas las imágenes del sitio."
-)
-DEFAULT_OUTPUT_DIR = Path("app/static/img/generated")
-DEFAULT_MANIFEST_PATH = Path("data/generated_images_manifest.json")
-DEFAULT_MAP_PATH = Path("data/generated_images_map.json")
-URL_PREFIX = "/static/img/generated"
+ROOT = Path(__file__).resolve().parents[1]
+HOME_TEMPLATE = ROOT / "app/templates/home.html"
+OUTPUT_ROOT = ROOT / "app/static/img/generated/home"
+MANIFEST_PATH = ROOT / "data/generated_images_manifest.json"
 
-SOURCE_IMAGE_PATTERN = re.compile(
-    r"(?:https://images\.unsplash\.com/[^'\"\s)]+|/static/img/generated/[^'\"\s)]+)"
-)
-IMG_BLOCK_PATTERN = re.compile(r"<img\b[^>]*>", re.IGNORECASE | re.DOTALL)
-SECTION_PATTERN = re.compile(r"<(section|article|main|div)\b[^>]*>.*?</\1>", re.IGNORECASE | re.DOTALL)
-TAG_PATTERN = re.compile(r"<[^>]+>")
-JINJA_PATTERN = re.compile(r"\{[{%].*?[}%]\}", re.DOTALL)
+MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
 
 
-@dataclass
-class ImageTask:
-    template_path: Path
-    original_url: str
-    context_text: str
-    alt_text: str
-    section_slug: str
-    image_index: int
+@dataclass(frozen=True)
+class SlotSpec:
+    slot: str
+    alt: str
+    prompt: str
+    source_template: str = "app/templates/home.html"
 
 
-def slugify(value: str) -> str:
-    value = value.lower()
-    value = re.sub(r"[^a-z0-9]+", "-", value)
-    return value.strip("-") or "section"
+HOME_SLOTS: list[SlotSpec] = [
+    SlotSpec("home.hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto."),
+    SlotSpec("home.beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos."),
+    SlotSpec("home.beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida."),
+    SlotSpec("home.beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla."),
+    SlotSpec("home.como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural."),
+    SlotSpec("home.como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural."),
+    SlotSpec("home.como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida."),
+    SlotSpec("home.testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones."),
+    SlotSpec("home.testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro."),
+    SlotSpec("home.testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio."),
+    SlotSpec("home.faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural."),
+]
+
+SIZES = {"sm": (640, 426), "md": (1024, 683), "lg": (1536, 1024)}
 
 
-def clean_text(raw: str) -> str:
-    no_jinja = JINJA_PATTERN.sub(" ", raw)
-    no_tags = TAG_PATTERN.sub(" ", no_jinja)
-    compact = re.sub(r"\s+", " ", no_tags)
-    return compact.strip()
+def _slot_dir(slot: str) -> Path:
+    return OUTPUT_ROOT / slot
 
 
-def section_for_offset(source: str, offset: int) -> str:
-    for match in SECTION_PATTERN.finditer(source):
-        if match.start() <= offset <= match.end():
-            return match.group(0)
-    start = max(0, offset - 1000)
-    end = min(len(source), offset + 400)
-    return source[start:end]
+def _output_files(slot: str) -> dict[str, Path]:
+    base = _slot_dir(slot)
+    return {k: base / f"{k}.webp" for k in SIZES}
 
 
-def alt_for_offset(source: str, offset: int) -> str:
-    start = max(0, offset - 250)
-    end = min(len(source), offset + 350)
-    snippet = source[start:end]
-    img_match = IMG_BLOCK_PATTERN.search(snippet)
-    if not img_match:
-        return ""
-    alt_match = re.search(r'alt=[\"\']([^\"\']+)[\"\']', img_match.group(0), re.IGNORECASE)
-    return alt_match.group(1).strip() if alt_match else ""
+def _is_complete(slot: str) -> bool:
+    return all(path.exists() for path in _output_files(slot).values())
 
 
-def build_prompt(context_text: str, alt_text: str) -> str:
-    normalized_context = textwrap.shorten(context_text, width=320, placeholder="...")
-    guidance = f"Contexto de la sección: {normalized_context}."
-    alt_hint = f" Descripción esperada: {alt_text}." if alt_text else ""
-    return f"{BASE_STYLE_PROMPT} {guidance}{alt_hint}"
+def _generate_real_png(client, prompt: str) -> bytes:
+    result = client.images.generate(model=MODEL, prompt=prompt, size="1536x1024", quality="high")
+    b64 = result.data[0].b64_json
+    if not b64:
+        raise RuntimeError("OpenAI no devolvió b64_json")
+    return base64.b64decode(b64)
 
 
-def extract_tasks(template_path: Path) -> list[ImageTask]:
-    raw = template_path.read_text(encoding="utf-8")
-    tasks: list[ImageTask] = []
-    for idx, match in enumerate(SOURCE_IMAGE_PATTERN.finditer(raw), start=1):
-        section_html = section_for_offset(raw, match.start())
-        context_text = clean_text(section_html)
-        alt_text = alt_for_offset(raw, match.start())
-        slug_seed = alt_text or context_text[:80] or template_path.stem
-        tasks.append(
-            ImageTask(
-                template_path=template_path,
-                original_url=match.group(0),
-                context_text=context_text,
-                alt_text=alt_text,
-                section_slug=slugify(slug_seed),
-                image_index=idx,
-            )
-        )
-    return tasks
+def _generate_mock_png(slot: str, prompt: str) -> bytes:
+    w, h = 1536, 1024
+    image = Image.new("RGB", (w, h), color=(228, 216, 194))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((60, 60, w - 60, h - 60), outline=(120, 95, 65), width=5)
+    draw.text((100, 120), f"MOCK {slot}", fill=(88, 64, 40))
+    draw.text((100, 190), prompt[:180], fill=(88, 64, 40))
+    buf = BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
 
 
-def generate_with_openai(client: OpenAI, prompt: str, size: str, quality: str) -> bytes:
-    result = client.images.generate(
-        model="gpt-image-1",
-        prompt=prompt,
-        size=size,
-        quality=quality,
-    )
-    image_b64 = result.data[0].b64_json
-    if not image_b64:
-        raise RuntimeError("La API no devolvió imagen en base64.")
-    return base64.b64decode(image_b64)
-
-
-def generate_mock_image(prompt: str, size: tuple[int, int]) -> bytes:
-    img = Image.new("RGB", size, color=(244, 244, 240))
-    draw = ImageDraw.Draw(img)
-    preview = textwrap.fill(prompt[:160], width=34)
-    draw.text((40, 40), preview, fill=(64, 64, 64))
-    from io import BytesIO
-
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    return buffer.getvalue()
-
-
-def clear_generated_dir(output_dir: Path) -> None:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    for file_path in output_dir.glob("*"):
-        if file_path.name == ".gitkeep":
-            continue
-        if file_path.is_file():
-            file_path.unlink()
-
-
-def save_responsive_webp(png_bytes: bytes, output_base: Path) -> str:
-    output_base.parent.mkdir(parents=True, exist_ok=True)
-    from io import BytesIO
-
+def _save_webp_variants(png_bytes: bytes, slot: str) -> dict[str, str]:
+    out = _output_files(slot)
+    out[next(iter(out))].parent.mkdir(parents=True, exist_ok=True)
     with Image.open(BytesIO(png_bytes)) as image:
-        image = image.convert("RGB")
-        sizes = {"sm": 640, "md": 1024, "lg": 1536}
-        for suffix, width in sizes.items():
-            resized = image.copy()
-            resized.thumbnail((width, width), Image.Resampling.LANCZOS)
-            resized.save(output_base.with_name(f"{output_base.name}-{suffix}.webp"), format="WEBP", quality=82, method=6)
-    return f"{URL_PREFIX}/{output_base.name}-lg.webp"
+        source = image.convert("RGB")
+        public: dict[str, str] = {}
+        for size_name, dims in SIZES.items():
+            variant = source.resize(dims, Image.Resampling.LANCZOS)
+            variant.save(out[size_name], format="WEBP", quality=82, method=6)
+            public[size_name] = str(out[size_name].relative_to(ROOT))
+        return public
 
 
-def replace_urls_in_template(template_path: Path, replacements: list[str]) -> None:
-    raw = template_path.read_text(encoding="utf-8")
-    index = 0
-
-    def _replace(_: re.Match[str]) -> str:
-        nonlocal index
-        value = replacements[index]
-        index += 1
-        return value
-
-    updated = SOURCE_IMAGE_PATTERN.sub(_replace, raw)
-    template_path.write_text(updated, encoding="utf-8")
+def _load_manifest() -> list[dict]:
+    if not MANIFEST_PATH.exists():
+        return []
+    try:
+        data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
 
 
-def process_templates(root: Path, use_mock: bool, size: str, quality: str) -> tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]:
-    templates = sorted(root.glob("*.html"))
-    if not templates:
-        raise RuntimeError("No se encontraron templates HTML en app/templates.")
+def _write_manifest(rows: list[dict]) -> None:
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    dims = tuple(int(v) for v in size.split("x"))
-    client = None if use_mock else OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    manifest: dict[str, dict[str, str]] = {}
-    generated_map: dict[str, list[dict[str, str]]] = {}
 
-    clear_generated_dir(DEFAULT_OUTPUT_DIR)
+def _upsert_manifest(manifest: list[dict], row: dict) -> None:
+    for idx, existing in enumerate(manifest):
+        if existing.get("slot") == row.get("slot"):
+            manifest[idx] = row
+            return
+    manifest.append(row)
 
-    for template in templates:
-        tasks = extract_tasks(template)
-        if not tasks:
+
+def generate_home(mock: bool, force: bool) -> None:
+    manifest = _load_manifest()
+    client = None
+    if not mock:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+    for spec in HOME_SLOTS:
+        files = _output_files(spec.slot)
+        if _is_complete(spec.slot) and not force:
+            row = {
+                "slot": spec.slot,
+                "prompt": spec.prompt,
+                "alt": spec.alt,
+                "model": "mock" if mock else MODEL,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "source_template": spec.source_template,
+                "output_files": {k: str(v.relative_to(ROOT)) for k, v in files.items()},
+                "status": "skipped-existing",
+            }
+            _upsert_manifest(manifest, row)
             continue
 
-        generated_urls: list[str] = []
-        template_key = str(template)
-        manifest[template_key] = {}
-        generated_map[template_key] = []
+        png = _generate_mock_png(spec.slot, spec.prompt) if mock else _generate_real_png(client, spec.prompt)
+        saved = _save_webp_variants(png, spec.slot)
+        row = {
+            "slot": spec.slot,
+            "prompt": spec.prompt,
+            "alt": spec.alt,
+            "model": "mock" if mock else MODEL,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "source_template": spec.source_template,
+            "output_files": saved,
+            "status": "generated",
+        }
+        _upsert_manifest(manifest, row)
 
-        for task in tasks:
-            prompt = build_prompt(task.context_text, task.alt_text)
-            file_stem = f"{task.template_path.stem}-{task.image_index:02d}-{task.section_slug}"
-            output_base = DEFAULT_OUTPUT_DIR / file_stem
+    manifest.sort(key=lambda x: x.get("slot", ""))
+    _write_manifest(manifest)
 
-            png_bytes = generate_mock_image(prompt, dims) if use_mock else generate_with_openai(client, prompt, size, quality)
-            new_src = save_responsive_webp(png_bytes, output_base)
-            generated_urls.append(new_src)
-            manifest[template_key][task.original_url] = new_src
-            generated_map[template_key].append(
-                {
-                    "target": new_src,
-                    "alt": task.alt_text,
-                    "prompt": prompt,
-                }
-            )
 
-        replace_urls_in_template(template, generated_urls)
-
-    return manifest, generated_map
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generador IA de imágenes por slots para Home.")
+    parser.add_argument("--only", choices=["home"], default="home")
+    parser.add_argument("--mock", action="store_true", help="Genera placeholders locales sin API key")
+    parser.add_argument("--real", action="store_true", help="Genera imágenes reales con OpenAI")
+    parser.add_argument("--force", action="store_true", help="Regenera aunque existan archivos")
+    return parser.parse_args()
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Pipeline de generación y reemplazo automático de imágenes del sitio.")
-    parser.add_argument("--templates-dir", default="app/templates", help="Directorio con templates HTML.")
-    parser.add_argument("--size", default="1536x1024", help="Resolución fija de generación IA (ancho x alto).")
-    parser.add_argument("--quality", default="high", choices=["low", "medium", "high"], help="Calidad fija del modelo de imágenes.")
-    parser.add_argument("--mock", action="store_true", help="No llama API externa; genera imágenes de prueba locales.")
-    parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST_PATH), help="Ruta para guardar trazabilidad de reemplazos.")
-    parser.add_argument("--map", default=str(DEFAULT_MAP_PATH), help="Ruta para guardar prompts y rutas finales.")
-    args = parser.parse_args()
+    args = parse_args()
+    if args.mock and args.real:
+        raise SystemExit("Elegí solo un modo: --mock o --real")
 
-    if not args.mock and not os.environ.get("OPENAI_API_KEY"):
-        raise SystemExit("Falta OPENAI_API_KEY. Usa --mock para pruebas locales sin API.")
+    use_mock = args.mock or not args.real
+    if not use_mock and not os.environ.get("OPENAI_API_KEY"):
+        raise SystemExit("Falta OPENAI_API_KEY. Usá --mock o configurá la variable para --real")
 
-    manifest, generated_map = process_templates(Path(args.templates_dir), args.mock, args.size, args.quality)
+    if args.only == "home":
+        if not HOME_TEMPLATE.exists():
+            raise SystemExit("No se encontró app/templates/home.html")
+        generate_home(mock=use_mock, force=args.force)
 
-    manifest_path = Path(args.manifest)
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-
-    map_path = Path(args.map)
-    map_path.parent.mkdir(parents=True, exist_ok=True)
-    map_path.write_text(json.dumps(generated_map, indent=2, ensure_ascii=False), encoding="utf-8")
-
-    print(f"Pipeline completado. Templates actualizados: {len(manifest)}")
-    print(f"Output dir: {DEFAULT_OUTPUT_DIR}")
-    print(f"Manifest: {manifest_path}")
-    print(f"Map: {map_path}")
+    print("Generación completada")
 
 
 if __name__ == "__main__":
