@@ -167,7 +167,7 @@ El script genera archivos en: `app/static/img/generated/{section}/{slot}/{size}.
 
 Con el server levantado:
 ```powershell
-start http://127.0.0.1:8000/debug/static-check
+start http://127.0.0.1:8000/debug/static
 start http://127.0.0.1:8000/static/img/generated/stages/hero/md.webp
 start http://127.0.0.1:8000/static/img/generated/kits/hero/md.webp
 start http://127.0.0.1:8000/static/img/generated/products/hero/md.webp
@@ -175,7 +175,7 @@ start http://127.0.0.1:8000/static/img/generated/products/hero/md.webp
 
 También podés probar por terminal:
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8000/debug/static-check -Method Get
+Invoke-WebRequest http://127.0.0.1:8000/debug/static -Method Get
 Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/stages/hero/md.webp -Method Head
 Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/kits/hero/md.webp -Method Head
 Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/products/hero/md.webp -Method Head
@@ -208,7 +208,7 @@ python scripts\smoke_test_images.py
 
 Checks manuales rápidos:
 ```powershell
-start http://127.0.0.1:8000/debug/static-check
+start http://127.0.0.1:8000/debug/static
 start http://127.0.0.1:8000/stages
 start http://127.0.0.1:8000/products
 # ejemplo directo (reemplazar <slot>)
@@ -229,7 +229,7 @@ python scripts\audit_rendered_img_srcs.py
 ```
 
 Abrir y validar:
-- `/debug/static-check`
+- `/debug/static`
 - `/stages`
 - `/products`
 - `/kits`
@@ -252,3 +252,19 @@ py scripts/smoke_routes.py --base-url http://127.0.0.1:8000
 
 El smoke valida status `200` y cantidad mínima de etiquetas `<img` en `/`, `/stages`, `/stages/23`, `/stages/24`, `/kits`, `/admin` y `/admin/editor`.
 
+
+
+## Check de estáticos (local + cloudflared)
+
+Con el server levantado, validá que los assets respondan tanto en local como en el túnel:
+
+```bash
+curl -I http://127.0.0.1:8000/static/assets/logo.svg
+curl -I https://xxxxx.trycloudflare.com/static/assets/logo.svg
+```
+
+También podés inspeccionar diagnóstico:
+
+```bash
+curl http://127.0.0.1:8000/debug/static
+```
