@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+
+from app.templating import templates
 
 from app.repositories import get_stage, list_kits, list_products, list_stages, list_steps_by_stage
 from app.services.image_resolver import (
@@ -18,7 +19,7 @@ from app.services.image_resolver import (
 )
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+
 
 
 def _home_images() -> dict[str, str]:
@@ -144,7 +145,7 @@ def debug_static_check(request: Request):
             files.append({
                 "relative": rel,
                 "size": size,
-                "url": request.url_for("static", path=rel),
+                "url": request.app.url_path_for("static", path=rel),
             })
             total_bytes += size
 
@@ -205,7 +206,7 @@ def debug_static_check(request: Request):
             exists = abs_path.exists() and abs_path.stat().st_size > 0
             status = "EXISTS" if exists else "MISSING"
             color = "#166534" if exists else "#b91c1c"
-            url = str(request.url_for("static", path=rel_path))
+            url = str(request.app.url_path_for("static", path=rel_path))
             html_parts.append(
                 f"<li><strong>{item['label']}</strong>: <code>{rel_path}</code> "
                 f"<span style='color:{color};font-weight:bold;'>{status}</span> "
