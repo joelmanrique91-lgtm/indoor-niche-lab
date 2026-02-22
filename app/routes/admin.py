@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 
 from app.db import init_db
+from app.templating import templates
 from app.repositories import (
     create_stage,
     create_step,
@@ -15,7 +15,6 @@ from app.repositories import (
 from app.services.ai_content import generate_stage_tutorial
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-templates = Jinja2Templates(directory="app/templates")
 
 def _stage_illustration(name: str) -> str:
     normalized = "".join(ch.lower() if ch.isalnum() else " " for ch in name)

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.routes import admin, api, web
 
@@ -22,6 +23,7 @@ if STATIC_ROOT:
     (STATIC_ROOT / "img" / "generated").mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Indoor Niche Lab")
+app.add_middleware(ProxyHeadersMiddleware)
 if STATIC_ROOT:
     app.mount("/static", StaticFiles(directory=str(STATIC_ROOT)), name="static")
 
