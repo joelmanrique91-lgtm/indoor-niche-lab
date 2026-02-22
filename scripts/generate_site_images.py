@@ -5,6 +5,8 @@ import argparse
 import base64
 import json
 import os
+import re
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BytesIO
@@ -72,15 +74,6 @@ def _dynamic_slots() -> list[SlotSpec]:
                 f"Imagen de la etapa {stage.name}",
                 f"Fotografía realista de la etapa '{stage.name}' del cultivo de hongos gourmet, contexto doméstico controlado, luz natural y enfoque detallado.",
                 "app/templates/stage_list.html",
-            )
-        )
-        slots.append(
-            SlotSpec(
-                "stages",
-                entity_slot("stage-detail", stage.id, stage.name),
-                f"Detalle ampliado de la etapa {stage.name}",
-                f"Fotografía realista en primer plano del proceso de la etapa '{stage.name}' para tutorial de cultivo de hongos gourmet, alta nitidez y composición didáctica.",
-                "app/templates/stage_detail.html",
             )
         )
 
@@ -178,14 +171,53 @@ def _load_manifest() -> list[dict]:
         return []
     try:
         data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        return data if isinstance(data, list) else []
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            items = data.get("items", [])
+            return items if isinstance(items, list) else []
+        return []
     except Exception:
         return []
 
 
+def _build_manifest_items(rows: list[dict]) -> list[dict]:
+    items: list[dict] = []
+    for row in rows:
+        slot_key = str(row.get("slot", ""))
+        if "." not in slot_key:
+            continue
+        section, slot = slot_key.split(".", 1)
+        output_files = row.get("output_files", {})
+        if not isinstance(output_files, dict):
+            continue
+        for size, relative in output_files.items():
+            rel = Path(str(relative))
+            abs_path = ROOT / rel
+            bytes_size = abs_path.stat().st_size if abs_path.exists() else 0
+            static_relative = rel.as_posix().removeprefix("app/static/")
+            items.append(
+                {
+                    "section": section,
+                    "slot": slot,
+                    "size": size,
+                    "path": rel.as_posix(),
+                    "url": f"/static/{static_relative}",
+                    "bytes": bytes_size,
+                }
+            )
+    items.sort(key=lambda item: (item["section"], item["slot"], item["size"]))
+    return items
+
+
 def _write_manifest(rows: list[dict]) -> None:
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST_PATH.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+    payload = {
+        "version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "items": _build_manifest_items(rows),
+    }
+    MANIFEST_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def _upsert_manifest(manifest: list[dict], row: dict) -> None:
@@ -213,6 +245,63 @@ def sanity_check_outputs(manifest: list[dict]) -> tuple[int, list[str]]:
             stale_slots.append(slot)
     print(f"[images] sanity_check_outputs: stale={len(stale_slots)}")
     return len(stale_slots), stale_slots
+
+
+def migrate_legacy_map_to_new_layout() -> None:
+    legacy_map = ROOT / "data/generated_images_map.json"
+    if not legacy_map.exists():
+        return
+
+    try:
+        data = json.loads(legacy_map.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"[images] legacy_map unreadable: {exc}")
+        return
+
+    stage_rows = sorted(list_stages(), key=lambda row: (row.order_index, row.id or 0))
+    product_rows = sorted(list_products(), key=lambda row: (row.category, row.name, row.id or 0))
+
+    migrated = 0
+    ignored = 0
+    for entries in data.values() if isinstance(data, dict) else []:
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            target = str(entry.get("target", ""))
+            if not target.startswith("/static/img/generated/"):
+                continue
+            filename = Path(target).name
+            m = re.match(r"^(stage_list|product_list|stage_detail)-(\d+)-.+-(sm|md|lg)\.webp$", filename)
+            if not m:
+                ignored += 1
+                continue
+
+            kind, idx_s, size = m.groups()
+            idx = int(idx_s) - 1
+            if kind in {"stage_list", "stage_detail"}:
+                if idx < 0 or idx >= len(stage_rows):
+                    ignored += 1
+                    continue
+                slot = entity_slot("stage", stage_rows[idx].id, stage_rows[idx].name)
+                dest = OUTPUT_ROOT / "stages" / slot / f"{size}.webp"
+            else:
+                if idx < 0 or idx >= len(product_rows):
+                    ignored += 1
+                    continue
+                slot = entity_slot("product", product_rows[idx].id, product_rows[idx].name)
+                dest = OUTPUT_ROOT / "products" / slot / f"{size}.webp"
+
+            src = ROOT / "app" / "static" / target.removeprefix("/static/")
+            if not src.exists() or src.stat().st_size <= 0:
+                ignored += 1
+                continue
+
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if not dest.exists() or dest.stat().st_size <= 0:
+                shutil.copy2(src, dest)
+                migrated += 1
+
+    print(f"[images] legacy_migration migrated={migrated} ignored={ignored}")
 
 
 def generate_slots(slots: list[SlotSpec], mock: bool, force: bool) -> tuple[dict[str, int], list[str]]:
@@ -325,6 +414,7 @@ def _count_generated_files() -> int:
 def main() -> None:
     args = parse_args()
     use_mock = _resolve_mode(args)
+    migrate_legacy_map_to_new_layout()
 
     slots = _selected_slots(args.only)
     counters, failures = generate_slots(slots=slots, mock=use_mock, force=args.force)

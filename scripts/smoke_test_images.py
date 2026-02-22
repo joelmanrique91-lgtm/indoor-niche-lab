@@ -33,20 +33,39 @@ def _public_to_file(public_url: str) -> Path:
     return ROOT / "app" / "static" / public_url.removeprefix("/static/")
 
 
-def _load_manifest() -> list[dict]:
+def _load_manifest_items() -> list[dict]:
     if not MANIFEST_PATH.exists():
         raise SystemExit("Manifest de imágenes no encontrado. Ejecutá generate_site_images.py primero.")
+
     data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    if not isinstance(data, list):
-        raise SystemExit("Manifest inválido: se esperaba una lista de slots")
-    return data
+    if isinstance(data, list):
+        items = []
+        for row in data:
+            slot_key = str(row.get("slot", ""))
+            if "." not in slot_key:
+                continue
+            section, slot = slot_key.split(".", 1)
+            output_files = row.get("output_files", {})
+            if not isinstance(output_files, dict):
+                continue
+            for size, path in output_files.items():
+                items.append({"section": section, "slot": slot, "size": size, "path": path})
+        return items
+
+    if not isinstance(data, dict):
+        raise SystemExit("Manifest inválido: formato no reconocido")
+
+    items = data.get("items", [])
+    if not isinstance(items, list):
+        raise SystemExit("Manifest inválido: 'items' debe ser una lista")
+    return items
 
 
-def _check_manifest_and_fallback(entries: list[dict]) -> None:
+def _check_manifest_and_fallback(items: list[dict]) -> None:
     from app.services.image_resolver import home_image
 
-    by_slot = {entry.get("slot"): entry for entry in entries}
-    missing = [slot for slot in HOME_SLOTS if slot not in by_slot]
+    slot_keys = {f"{item.get('section')}.{item.get('slot')}" for item in items if item.get("section") and item.get("slot")}
+    missing = [slot for slot in HOME_SLOTS if slot not in slot_keys]
     if missing:
         raise SystemExit(f"Faltan slots en manifest: {', '.join(missing)}")
 
@@ -86,10 +105,34 @@ def _check_home_render_and_images() -> None:
             raise SystemExit(f"Imagen referenciada no existe: {src} -> {file_path}")
 
 
+def _check_stage_product_coverage() -> None:
+    from app.repositories import list_products, list_stages
+    from app.services.image_resolver import entity_slot, resolve_static_path, PLACEHOLDER_STATIC_PATH
+
+    missing: list[str] = []
+
+    for stage in list_stages():
+        slot = entity_slot("stage", stage.id, stage.name)
+        resolved = resolve_static_path("stages", slot, "md")
+        if resolved == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"stage id={stage.id} slot={slot} size=md")
+
+    for product in list_products():
+        slot = entity_slot("product", product.id, product.name)
+        resolved = resolve_static_path("products", slot, "md")
+        if resolved == PLACEHOLDER_STATIC_PATH:
+            missing.append(f"product id={product.id} slot={slot} size=md")
+
+    if missing:
+        lines = "\n - ".join(missing)
+        raise SystemExit(f"Cobertura de imágenes incompleta; resolver cae en placeholder:\n - {lines}")
+
+
 def main() -> None:
-    entries = _load_manifest()
-    _check_manifest_and_fallback(entries)
+    items = _load_manifest_items()
+    _check_manifest_and_fallback(items)
     _check_home_render_and_images()
+    _check_stage_product_coverage()
     print("OK")
 
 

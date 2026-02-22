@@ -180,3 +180,37 @@ Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/stages/hero/md.webp
 Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/kits/hero/md.webp -Method Head
 Invoke-WebRequest http://127.0.0.1:8000/static/img/generated/products/hero/md.webp -Method Head
 ```
+
+
+## Flujo recomendado (PowerShell, end-to-end)
+
+1) Inicializar DB + demo:
+```powershell
+python scripts\init_db.py
+python scripts\seed_demo.py
+```
+
+2) Generar imágenes (real):
+```powershell
+$env:OPENAI_API_KEY="tu_api_key"
+python scripts\generate_site_images.py --real --force
+```
+
+3) Levantar servidor:
+```powershell
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+4) Verificar cobertura de imágenes (debe pasar):
+```powershell
+python scripts\smoke_test_images.py
+```
+
+Checks manuales rápidos:
+```powershell
+start http://127.0.0.1:8000/debug/static-check
+start http://127.0.0.1:8000/stages
+start http://127.0.0.1:8000/products
+# ejemplo directo (reemplazar <slot>)
+start http://127.0.0.1:8000/static/img/generated/stages/<slot>/md.webp
+```
