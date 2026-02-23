@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS products (
     category TEXT NOT NULL,
     price REAL NOT NULL,
     affiliate_url TEXT NOT NULL,
-    internal_product INTEGER NOT NULL DEFAULT 0
+    internal_product INTEGER NOT NULL DEFAULT 0,
+    image TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 
@@ -79,5 +80,6 @@ def init_db(db_path: str | None = None) -> None:
         _add_column_if_missing(conn, "stages", "image_card_2", "TEXT")
         _add_column_if_missing(conn, "stages", "image_hero", "TEXT")
         _add_column_if_missing(conn, "tutorial_steps", "image", "TEXT")
+        _add_column_if_missing(conn, "products", "image", "TEXT")
         _add_column_if_missing(conn, "kits", "image_card", "TEXT")
         _add_column_if_missing(conn, "kits", "image_result", "TEXT")

@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{ stage.name }}</h1>
-<img class="stage-banner" src="{{ url_for('static', path=stage_image_path) }}" alt="Etapa del cultivo de hongos en condiciones reales" loading="lazy">
+{% set hero = stage_image_variants %}
+<picture>
+  {% if hero.webp %}<source srcset="{{ url_for('static', path=hero.webp) }}" type="image/webp">{% endif %}
+  <img class="stage-banner" src="{{ url_for('static', path=hero.fallback) }}" alt="Etapa {{ stage.name }} en condiciones reales" loading="lazy" width="1200" height="360">
+</picture>
 <p><a href="/stages">← Volver a etapas</a></p>
 
 {% for step in steps %}
 <article class="card stage-step-card">
-  <img
-    class="stage-step-image"
-    src="{{ url_for('static', path=step.image_cards.card_1) }}"
-    alt="Miniatura 1 del proceso: {{ step.title }}"
-    loading="lazy"
-  >
-  <img
-    class="stage-step-image"
-    src="{{ url_for('static', path=step.image_cards.card_2) }}"
-    alt="Miniatura 2 del proceso: {{ step.title }}"
-    loading="lazy"
-  >
+  {% set c1 = step.image_variants.card_1 %}
+  <picture>
+    {% if c1.webp %}<source srcset="{{ url_for('static', path=c1.webp) }}" type="image/webp">{% endif %}
+    <img class="stage-step-image" src="{{ url_for('static', path=c1.fallback) }}" alt="{{ step.title }}" loading="lazy" width="560" height="220">
+  </picture>
+  {% set c2 = step.image_variants.card_2 %}
+  <picture>
+    {% if c2.webp %}<source srcset="{{ url_for('static', path=c2.webp) }}" type="image/webp">{% endif %}
+    <img class="stage-step-image" src="{{ url_for('static', path=c2.fallback) }}" alt="Detalle visual de {{ step.title }}" loading="lazy" width="560" height="220">
+  </picture>
   <h2>{{ loop.index }}. {{ step.title }}</h2>
   <p style="white-space: pre-line;">{{ step.content }}</p>
   <p><strong>Materiales:</strong></p>

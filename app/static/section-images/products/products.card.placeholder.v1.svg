@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Producto placeholder">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Producto">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#edf7f2"/>
@@ -14,6 +14,6 @@
   </g>
   <rect x="120" y="110" width="960" height="580" rx="20" fill="#ffffff" opacity="0.68"/>
   <text x="600" y="360" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="54" fill="#294d3b">Indoor Niche Lab</text>
-  <text x="600" y="430" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="36" fill="#3f6b56">Producto placeholder</text>
-  <text x="600" y="490" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="26" fill="#5b7568">Placeholder versionado</text>
+  <text x="600" y="430" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="36" fill="#3f6b56">Producto</text>
+  <text x="600" y="490" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="26" fill="#5b7568">Imagen editorial</text>
 </svg>

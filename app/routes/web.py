@@ -7,16 +7,17 @@ from fastapi.responses import HTMLResponse
 
 from app.templating import templates
 
-from app.repositories import get_stage, list_kits, list_products, list_stages, list_steps_by_stage
+from app.repositories import get_product, get_stage, list_kits, list_products, list_stages, list_steps_by_stage
 from app.services.image_resolver import (
     entity_slot,
+    build_picture_sources,
     kit_card_image,
     kit_result_image,
+    product_image,
     resolve_static_path,
     resolution_debug,
     stage_hero_image,
     stage_list_images,
-    step_image,
     step_image_cards,
 )
 
@@ -58,6 +59,7 @@ def stages(request: Request):
                 "name": stage.name,
                 "order_index": stage.order_index,
                 "images": stage_list_images(stage),
+                "image_variants": {k: build_picture_sources(v) for k, v in stage_list_images(stage).items()},
             }
         )
     return templates.TemplateResponse("stage_list.html", {"request": request, "stages": stage_rows, "hero_path": resolve_static_path("stages", "hero", "md")})
@@ -69,18 +71,20 @@ def stage_detail(stage_id: int, request: Request):
     if not stage:
         raise HTTPException(status_code=404, detail="Etapa no encontrada")
     steps = list_steps_by_stage(stage_id)
-    step_rows = [
-        {
-            "id": step.id,
-            "title": step.title,
-            "content": step.content,
-            "tools_json": step.tools_json,
-            "estimated_cost_usd": step.estimated_cost_usd,
-            "image_path": step_image(step, stage=stage),
-            "image_cards": step_image_cards(step, stage=stage),
-        }
-        for step in steps
-    ]
+    step_rows = []
+    for step in steps:
+        cards = step_image_cards(step, stage=stage)
+        step_rows.append(
+            {
+                "id": step.id,
+                "title": step.title,
+                "content": step.content,
+                "tools_json": step.tools_json,
+                "estimated_cost_usd": step.estimated_cost_usd,
+                "image_cards": cards,
+                "image_variants": {"card_1": build_picture_sources(cards["card_1"]), "card_2": build_picture_sources(cards["card_2"])},
+            }
+        )
     return templates.TemplateResponse(
         "stage_detail.html",
         {
@@ -88,6 +92,7 @@ def stage_detail(stage_id: int, request: Request):
             "stage": stage,
             "steps": step_rows,
             "stage_image_path": stage_hero_image(stage),
+            "stage_image_variants": build_picture_sources(stage_hero_image(stage)),
         },
     )
 
@@ -96,6 +101,7 @@ def stage_detail(stage_id: int, request: Request):
 def products(request: Request):
     product_rows = []
     for product in list_products():
+        image_path = product_image(product)
         product_rows.append(
             {
                 "id": product.id,
@@ -104,11 +110,28 @@ def products(request: Request):
                 "price": product.price,
                 "affiliate_url": product.affiliate_url,
                 "internal_product": product.internal_product,
-                "slot": entity_slot("product", product.id, product.name),
-                "image_path": resolve_static_path("products", entity_slot("product", product.id, product.name), "md"),
+                "image_path": image_path,
+                "image_variants": build_picture_sources(image_path),
             }
         )
-    return templates.TemplateResponse("product_list.html", {"request": request, "products": product_rows, "hero_path": resolve_static_path("products", "hero", "md")})
+    hero_path = resolve_static_path("products", "hero", "md")
+    return templates.TemplateResponse(
+        "product_list.html",
+        {"request": request, "products": product_rows, "hero_path": hero_path, "hero_variants": build_picture_sources(hero_path)},
+    )
+
+
+@router.get("/products/{product_id}")
+def product_detail(product_id: int, request: Request):
+    product = get_product(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+    image_path = product_image(product)
+    return templates.TemplateResponse(
+        "product_detail.html",
+        {"request": request, "product": product, "image_path": image_path, "image_variants": build_picture_sources(image_path)},
+    )
 
 
 @router.get("/kits")
@@ -124,9 +147,12 @@ def kits(request: Request):
                 "components_json": kit.components_json,
                 "image_path": kit_card_image(kit),
                 "result_image_path": kit_result_image(kit),
+                "image_variants": build_picture_sources(kit_card_image(kit)),
+                "result_image_variants": build_picture_sources(kit_result_image(kit)),
             }
         )
-    return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows, "hero_path": resolve_static_path("kits", "hero", "md")})
+    hero_path = resolve_static_path("kits", "hero", "md")
+    return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows, "hero_path": hero_path, "hero_variants": build_picture_sources(hero_path)})
 
 
 @router.get("/debug/image-bindings")

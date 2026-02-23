@@ -10,8 +10,8 @@ PLACEHOLDER_STATIC_PATH = "img/placeholder.svg"
 
 SECTION_DEFAULT_PLACEHOLDERS = {
     "home": "img/placeholder.svg",
-    "stages": "section-images/stages/stages.card.placeholder.v1.svg",
-    "kits": "section-images/kits/kits.card.placeholder.v1.svg",
+    "stages": "section-images/stages/stage.card.1.v1.svg",
+    "kits": "section-images/kits/kit.card.v1.svg",
     "products": "section-images/products/products.card.placeholder.v1.svg",
 }
 
@@ -83,7 +83,7 @@ def resolve_static_path(section: str, slot: str, size: str = "md", fallback: str
 
     user_path = _normalize_user_path(raw_path)
     if user_path:
-        candidates.append(user_path)
+        candidates.insert(0, user_path)
 
     for candidate in candidates:
         if _existing_static_path(candidate):
@@ -98,64 +98,38 @@ def resolve_static_path(section: str, slot: str, size: str = "md", fallback: str
     return slot_fallback
 
 
-def resolve(section: str, slot: str, size: str = "md") -> str:
-    return f"/static/{resolve_static_path(section, slot, size=size)}"
+def build_picture_sources(path: str) -> dict[str, str | None]:
+    if path.endswith(".webp"):
+        fallback = next((path[:-5] + ext for ext in (".jpg", ".png", ".jpeg", ".svg") if _existing_static_path(path[:-5] + ext)), path)
+        return {"webp": path, "fallback": fallback}
 
-
-def home_image(slot: str, size: str = "md") -> str:
-    return resolve("home", slot, size)
+    stem, dot, ext = path.rpartition(".")
+    if dot:
+        webp_candidate = f"{stem}.webp"
+        if _existing_static_path(webp_candidate):
+            return {"webp": webp_candidate, "fallback": path}
+    return {"webp": None, "fallback": path}
 
 
 def stage_list_images(stage) -> dict[str, str]:
     slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None))
-    img1 = resolve_static_path(
-        "stages",
-        f"{slot}-card-1",
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["stages.card-1"],
-        raw_path=getattr(stage, "image_card_1", None),
-    )
-    img2 = resolve_static_path(
-        "stages",
-        f"{slot}-card-2",
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["stages.card-2"],
-        raw_path=getattr(stage, "image_card_2", None),
-    )
+    img1 = resolve_static_path("stages", f"{slot}-card-1", size="md", fallback=SLOT_PLACEHOLDERS["stages.card-1"], raw_path=getattr(stage, "image_card_1", None))
+    img2 = resolve_static_path("stages", f"{slot}-card-2", size="md", fallback=SLOT_PLACEHOLDERS["stages.card-2"], raw_path=getattr(stage, "image_card_2", None))
     return {"img1_path": img1, "img2_path": img2}
 
 
 def stage_hero_image(stage) -> str:
     slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None))
-    return resolve_static_path(
-        "stages",
-        slot,
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["stages.hero"],
-        raw_path=getattr(stage, "image_hero", None),
-    )
+    return resolve_static_path("stages", slot, size="md", fallback=SLOT_PLACEHOLDERS["stages.hero"], raw_path=getattr(stage, "image_hero", None))
 
 
 def step_image_cards(step, stage=None) -> dict[str, str]:
     step_slot = entity_slot("step", getattr(step, "id", None), getattr(step, "title", None))
     stage_slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None)) if stage else ""
 
-    card_1 = resolve_static_path(
-        "stages",
-        f"{step_slot}-card-1",
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["stages.step-default"],
-        raw_path=getattr(step, "image", None),
-    )
-    card_2 = resolve_static_path(
-        "stages",
-        f"{step_slot}-card-2",
-        size="md",
-        fallback=card_1,
-        raw_path=getattr(step, "image", None),
-    )
+    card_1 = resolve_static_path("stages", f"{step_slot}-card-1", size="md", fallback=SLOT_PLACEHOLDERS["stages.step-default"], raw_path=getattr(step, "image", None))
+    card_2 = resolve_static_path("stages", f"{step_slot}-card-2", size="md", fallback=card_1, raw_path=getattr(step, "image", None))
 
-    # fallback extra a imagen general de etapa si ambos faltan
     if card_1 == SLOT_PLACEHOLDERS["stages.step-default"] and stage_slot:
         card_1 = resolve_static_path("stages", stage_slot, size="md", fallback=SLOT_PLACEHOLDERS["stages.step-default"])
     if card_2 == card_1 and stage_slot:
@@ -170,24 +144,17 @@ def step_image(step, stage=None) -> str:
 
 def kit_card_image(kit) -> str:
     slot = entity_slot("kit", getattr(kit, "id", None), getattr(kit, "name", None))
-    return resolve_static_path(
-        "kits",
-        slot,
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["kits.card"],
-        raw_path=getattr(kit, "image_card", None),
-    )
+    return resolve_static_path("kits", slot, size="md", fallback=SLOT_PLACEHOLDERS["kits.card"], raw_path=getattr(kit, "image_card", None))
 
 
 def kit_result_image(kit) -> str:
     slot = entity_slot("kit-result", getattr(kit, "id", None), getattr(kit, "name", None))
-    return resolve_static_path(
-        "kits",
-        slot,
-        size="md",
-        fallback=SLOT_PLACEHOLDERS["kits.result"],
-        raw_path=getattr(kit, "image_result", None),
-    )
+    return resolve_static_path("kits", slot, size="md", fallback=SLOT_PLACEHOLDERS["kits.result"], raw_path=getattr(kit, "image_result", None))
+
+
+def product_image(product) -> str:
+    slot = entity_slot("product", getattr(product, "id", None), getattr(product, "name", None))
+    return resolve_static_path("products", slot, size="md", fallback=SECTION_DEFAULT_PLACEHOLDERS["products"], raw_path=getattr(product, "image", None))
 
 
 def resolution_debug(section: str, slot: str, raw_path: str | None = None) -> dict[str, object]:
