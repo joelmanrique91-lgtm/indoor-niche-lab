@@ -57,6 +57,15 @@ class GenerationOptions:
     mock: bool
     force: bool
     optimize_existing: bool
+    continue_on_error: bool
+
+
+@dataclass(frozen=True)
+class GenerationResult:
+    counters: dict[str, int]
+    failures: list[str]
+    pending_slots: list[str]
+    billing_detected: bool
 
 
 def _output_file(section: str, slot: str, size: str) -> Path:
@@ -381,14 +390,43 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--real", action="store_true", help="Usa OpenAI")
     parser.add_argument("--force", action="store_true", help="Regenera aunque existan archivos")
     parser.add_argument("--optimize-existing", action="store_true", help="Recomprime WEBP existentes sin regenerar prompt")
+    parser.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        help="Ante billing_hard_limit_reached, no vuelve a llamar a OpenAI y usa placeholders para slots restantes",
+    )
     return parser.parse_args()
 
 
-def generate(slots: list[SlotSpec], options: GenerationOptions) -> tuple[dict[str, int], list[str]]:
+def _extract_billing_error(exc: Exception) -> tuple[str, str] | None:
+    payload = getattr(exc, "body", None)
+    if isinstance(payload, dict):
+        err = payload.get("error", payload)
+        if isinstance(err, dict) and err.get("code") == "billing_hard_limit_reached":
+            return str(err.get("code")), str(err.get("message") or str(exc))
+
+    message = str(exc)
+    if "billing_hard_limit_reached" in message:
+        return "billing_hard_limit_reached", message
+    return None
+
+
+def generate(slots: list[SlotSpec], options: GenerationOptions) -> GenerationResult:
     payload = _load_manifest()
     manifest_map = _index_manifest(payload)
-    counters = {"generated": 0, "skipped": 0, "optimized": 0, "failed": 0}
+    counters = {
+        "generated": 0,
+        "skipped": 0,
+        "optimized": 0,
+        "failed": 0,
+        "blocked_billing": 0,
+        "placeholder_due_to_billing": 0,
+    }
     failures: list[str] = []
+    pending_slots: list[str] = []
+    billing_detected = False
+    billing_error_code: str | None = None
+    billing_error_message: str | None = None
 
     client = None
     if not options.mock:
@@ -398,10 +436,43 @@ def generate(slots: list[SlotSpec], options: GenerationOptions) -> tuple[dict[st
 
     now = datetime.now(timezone.utc).isoformat()
 
-    for slot in slots:
+    for idx, slot in enumerate(slots):
         section, slot_name = slot.slot_id.split(".", 1)
         existing = manifest_map.get(slot.slot_id, {})
         created_at = existing.get("created_at") or now
+
+        if billing_detected:
+            if options.continue_on_error:
+                try:
+                    png = _generate_mock_png(slot.slot_id, slot.prompt)
+                    output_files = _save_variants(png, section, slot_name, slot.sizes)
+                    counters["placeholder_due_to_billing"] += 1
+                    manifest_map[slot.slot_id] = {
+                        "slot_id": slot.slot_id,
+                        "section": slot.section,
+                        "entity": slot.entity,
+                        "prompt": slot.prompt,
+                        "negative_prompt": NEGATIVE_PROMPT,
+                        "alt": slot.alt,
+                        "style_id": STYLE_ID,
+                        "model": "mock",
+                        "created_at": created_at,
+                        "updated_at": now,
+                        "output_files": output_files,
+                        "status": "placeholder_due_to_billing",
+                        "error_code": billing_error_code,
+                        "error_message": billing_error_message,
+                        "timestamp": now,
+                    }
+                    print(f"[images] {slot.slot_id} -> placeholder_due_to_billing")
+                except Exception as exc:
+                    counters["failed"] += 1
+                    failures.append(f"{slot.slot_id}: {exc}")
+                    print(f"[images] {slot.slot_id} -> error: {exc}")
+            else:
+                pending_slots.append(slot.slot_id)
+            continue
+
         try:
             complete = _is_complete(section, slot_name, slot.sizes)
             if complete and not options.force:
@@ -435,10 +506,41 @@ def generate(slots: list[SlotSpec], options: GenerationOptions) -> tuple[dict[st
                 "updated_at": now,
                 "output_files": output_files,
                 "status": status,
+                "error_code": None,
                 "error_message": None,
+                "timestamp": None,
             }
             print(f"[images] {slot.slot_id} -> {status}")
         except Exception as exc:
+            billing_error = _extract_billing_error(exc)
+            if billing_error:
+                billing_detected = True
+                billing_error_code, billing_error_message = billing_error
+                counters["blocked_billing"] += 1
+                previous_output = existing.get("output_files", {}) if isinstance(existing, dict) else {}
+                manifest_map[slot.slot_id] = {
+                    "slot_id": slot.slot_id,
+                    "section": slot.section,
+                    "entity": slot.entity,
+                    "prompt": slot.prompt,
+                    "negative_prompt": NEGATIVE_PROMPT,
+                    "alt": slot.alt,
+                    "style_id": STYLE_ID,
+                    "model": "mock" if options.mock else DEFAULT_MODEL,
+                    "created_at": created_at,
+                    "updated_at": now,
+                    "output_files": previous_output,
+                    "status": "blocked_billing",
+                    "error_code": billing_error_code,
+                    "error_message": billing_error_message,
+                    "timestamp": now,
+                }
+                print(f"[images] {slot.slot_id} -> blocked_billing: {billing_error_message}")
+                if not options.continue_on_error:
+                    pending_slots.extend(next_slot.slot_id for next_slot in slots[idx + 1 :])
+                    break
+                continue
+
             counters["failed"] += 1
             failures.append(f"{slot.slot_id}: {exc}")
             previous_output = existing.get("output_files", {}) if isinstance(existing, dict) else {}
@@ -455,13 +557,20 @@ def generate(slots: list[SlotSpec], options: GenerationOptions) -> tuple[dict[st
                 "updated_at": now,
                 "output_files": previous_output,
                 "status": "error",
+                "error_code": None,
                 "error_message": str(exc),
+                "timestamp": now,
             }
             print(f"[images] {slot.slot_id} -> error: {exc}")
 
     payload["slots"] = list(manifest_map.values())
     _save_manifest(payload)
-    return counters, failures
+    return GenerationResult(
+        counters=counters,
+        failures=failures,
+        pending_slots=pending_slots,
+        billing_detected=billing_detected,
+    )
 
 
 def main() -> None:
@@ -472,16 +581,34 @@ def main() -> None:
     if args.only_slot and not selected:
         raise SystemExit(f"No existe slot_id: {args.only_slot}")
 
-    counters, failures = generate(
+    result = generate(
         slots=selected,
-        options=GenerationOptions(mock=mock, force=args.force, optimize_existing=args.optimize_existing),
+        options=GenerationOptions(
+            mock=mock,
+            force=args.force,
+            optimize_existing=args.optimize_existing,
+            continue_on_error=args.continue_on_error,
+        ),
     )
+
+    counters = result.counters
+    failures = result.failures
+    ok_total = counters["generated"] + counters["skipped"] + counters["optimized"]
 
     print(
         "[images] summary "
-        f"generated={counters['generated']} skipped={counters['skipped']} "
-        f"optimized={counters['optimized']} failed={counters['failed']}"
+        f"ok={ok_total} generated={counters['generated']} skipped={counters['skipped']} "
+        f"optimized={counters['optimized']} placeholders_due_billing={counters['placeholder_due_to_billing']} "
+        f"failed={counters['failed']} billing_failed={counters['blocked_billing']} pending={len(result.pending_slots)}"
     )
+    if result.pending_slots:
+        print("[images] pending slots:")
+        for slot_id in result.pending_slots:
+            print(f" - {slot_id}")
+
+    if result.billing_detected:
+        raise SystemExit(2)
+
     if failures:
         for failure in failures:
             print(f" - {failure}")
