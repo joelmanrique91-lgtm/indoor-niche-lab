@@ -8,8 +8,14 @@
 <article class="card stage-step-card">
   <img
     class="stage-step-image"
-    src="{{ url_for('static', path=step.image_path) }}"
-    alt="Miniatura del proceso: {{ step.title }}"
+    src="{{ url_for('static', path=step.image_cards.card_1) }}"
+    alt="Miniatura 1 del proceso: {{ step.title }}"
+    loading="lazy"
+  >
+  <img
+    class="stage-step-image"
+    src="{{ url_for('static', path=step.image_cards.card_2) }}"
+    alt="Miniatura 2 del proceso: {{ step.title }}"
     loading="lazy"
   >
   <h2>{{ loop.index }}. {{ step.title }}</h2>

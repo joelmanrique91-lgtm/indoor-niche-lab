@@ -268,3 +268,45 @@ También podés inspeccionar diagnóstico:
 ```bash
 curl http://127.0.0.1:8000/debug/static
 ```
+
+## Imágenes (Windows / PowerShell)
+
+```powershell
+# 1) Crear entorno virtual
+py -3.12 -m venv .venv
+
+# 2) Instalar dependencias
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r .\requirements.txt
+
+# 3) Setear API key (opcional para --mock, obligatorio para --real)
+$env:OPENAI_API_KEY="tu_api_key"
+
+# 4) Auditoría integral (manifest + filesystem + templates)
+python .\scripts\audit_images.py
+
+# 5) Generar en modo mock
+python .\scripts\generate_site_images.py --mock
+
+# 6) Generar en modo real (todo)
+python .\scripts\generate_site_images.py --real
+
+# 7) Generar solo una sección
+python .\scripts\generate_site_images.py --real --only stages
+
+# 8) Generar solo un slot
+python .\scripts\generate_site_images.py --real --only-slot "stages.hero"
+
+# 9) Forzar regeneración
+python .\scripts\generate_site_images.py --real --force
+
+# 10) Smoke test de app
+python .\scripts\smoke_test.py
+```
+
+Comando opcional para recomprimir archivos ya generados sin pedir imágenes nuevas:
+
+```powershell
+python .\scripts\generate_site_images.py --mock --optimize-existing
+```
+

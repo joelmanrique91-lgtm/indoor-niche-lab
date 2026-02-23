@@ -1,0 +1,329 @@
+{
+  "manifest_version": 2,
+  "style_id": "indoor-niche-lab.v1",
+  "generated_at": "2026-02-23T14:03:01.206994+00:00",
+  "slots": [
+    {
+      "slot_id": "home.beneficios-1",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Kit de cultivo completo sobre mesa limpia con componentes ordenados. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Kit de cultivo completo sobre mesa limpia con componentes ordenados.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/beneficios-1/sm.webp",
+        "md": "/static/img/generated/home/beneficios-1/md.webp",
+        "lg": "/static/img/generated/home/beneficios-1/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.beneficios-2",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Cosecha fresca de hongos gourmet en bandeja sobre mesada. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Cosecha fresca de hongos gourmet en bandeja sobre mesada.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/beneficios-2/sm.webp",
+        "md": "/static/img/generated/home/beneficios-2/md.webp",
+        "lg": "/static/img/generated/home/beneficios-2/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.beneficios-3",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Soporte de cultivo con móvil y guía junto al kit. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Soporte de cultivo con móvil y guía junto al kit.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/beneficios-3/sm.webp",
+        "md": "/static/img/generated/home/beneficios-3/md.webp",
+        "lg": "/static/img/generated/home/beneficios-3/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.como-funciona-1",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Entrega de kit listo para abrir en hogar. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Entrega de kit listo para abrir en hogar.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/como-funciona-1/sm.webp",
+        "md": "/static/img/generated/home/como-funciona-1/md.webp",
+        "lg": "/static/img/generated/home/como-funciona-1/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.como-funciona-2",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Seguimiento de checklist de cultivo en mesa limpia. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Seguimiento de checklist de cultivo en mesa limpia.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/como-funciona-2/sm.webp",
+        "md": "/static/img/generated/home/como-funciona-2/md.webp",
+        "lg": "/static/img/generated/home/como-funciona-2/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.como-funciona-3",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Resultado final listo para cocinar con hongos cosechados. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Resultado final listo para cocinar con hongos cosechados.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/como-funciona-3/sm.webp",
+        "md": "/static/img/generated/home/como-funciona-3/md.webp",
+        "lg": "/static/img/generated/home/como-funciona-3/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.faq",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Mesa ordenada de soporte de cultivo con libreta y kit. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Mesa ordenada de soporte de cultivo con libreta y kit.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/faq/sm.webp",
+        "md": "/static/img/generated/home/faq/md.webp",
+        "lg": "/static/img/generated/home/faq/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.hero",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Persona cosechando hongos gourmet en cocina doméstica ordenada. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Persona cosechando hongos gourmet en cocina doméstica ordenada.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/hero/sm.webp",
+        "md": "/static/img/generated/home/hero/md.webp",
+        "lg": "/static/img/generated/home/hero/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.testimonios-1",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Escena testimonial cocinando hongos con kit al fondo. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Escena testimonial cocinando hongos con kit al fondo.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/testimonios-1/sm.webp",
+        "md": "/static/img/generated/home/testimonios-1/md.webp",
+        "lg": "/static/img/generated/home/testimonios-1/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.testimonios-2",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Escena testimonial preparando kit sobre mesada. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Escena testimonial preparando kit sobre mesada.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/testimonios-2/sm.webp",
+        "md": "/static/img/generated/home/testimonios-2/md.webp",
+        "lg": "/static/img/generated/home/testimonios-2/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "home.testimonios-3",
+      "section": "home",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "home"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Escena testimonial sirviendo plato con hongos gourmet. Composition cues: medium shot, balanced framing, soft shadows. Constraints: no text overlays, no logos, no brand labels.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Escena testimonial sirviendo plato con hongos gourmet.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/home/testimonios-3/sm.webp",
+        "md": "/static/img/generated/home/testimonios-3/md.webp",
+        "lg": "/static/img/generated/home/testimonios-3/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "kits.hero",
+      "section": "kits",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "kits"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Kits de cultivo alineados sobre mesa limpia con componentes visibles. Composition cues: catalog wide shot with controlled background. Constraints: no text, no logos.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Portada de kits de cultivo indoor.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/kits/hero/sm.webp",
+        "md": "/static/img/generated/kits/hero/md.webp",
+        "lg": "/static/img/generated/kits/hero/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "products.hero",
+      "section": "products",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "products"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Surtido de productos de cultivo indoor ordenados como catálogo. Composition cues: wide product layout on neutral surface. Constraints: no text, no logos.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Portada de productos para cultivo indoor.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/products/hero/sm.webp",
+        "md": "/static/img/generated/products/hero/md.webp",
+        "lg": "/static/img/generated/products/hero/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    },
+    {
+      "slot_id": "stages.hero",
+      "section": "stages",
+      "entity": {
+        "type": "page",
+        "id": null,
+        "slug": "stages"
+      },
+      "prompt": "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, neutral warm color temperature, clean controlled background, realistic textures, commercial composition, no visible text, no logos, no watermark. Scene content: Resumen visual de etapas del cultivo indoor de hongos gourmet en estación doméstica controlada. Composition cues: wide editorial shot with depth layers. Constraints: no text, no logos.",
+      "negative_prompt": "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, no CGI/cartoon look, no noisy artifacts",
+      "alt": "Portada de etapas de cultivo indoor.",
+      "style_id": "indoor-niche-lab.v1",
+      "model": "mock",
+      "created_at": "2026-02-23T13:59:42.835812+00:00",
+      "updated_at": "2026-02-23T14:02:55.044601+00:00",
+      "output_files": {
+        "sm": "/static/img/generated/stages/hero/sm.webp",
+        "md": "/static/img/generated/stages/hero/md.webp",
+        "lg": "/static/img/generated/stages/hero/lg.webp"
+      },
+      "status": "ok",
+      "error_message": null
+    }
+  ]
+}
