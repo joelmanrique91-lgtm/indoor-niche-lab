@@ -5,8 +5,6 @@ import argparse
 import base64
 import json
 import os
-import re
-import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BytesIO
@@ -16,425 +14,478 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 import sys
+
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.repositories import list_kits, list_products, list_stages
-from app.services.image_resolver import entity_slot
+from app.repositories import list_kits, list_products, list_stages, list_steps_by_stage
+from app.services.image_resolver import entity_slot, slugify
 
-OUTPUT_ROOT = ROOT / "app/static/img/generated"
-MANIFEST_PATH = ROOT / "data/generated_images_manifest.json"
+OUTPUT_ROOT = ROOT / "app" / "static" / "img" / "generated"
+MANIFEST_PATH = ROOT / "data" / "generated_images_manifest.json"
+STYLE_ID = "indoor-niche-lab.v1"
+DEFAULT_MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
 
-MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
+SIZE_DIMS = {
+    "sm": (640, 426),
+    "md": (1024, 683),
+    "lg": (1536, 1024),
+}
+STYLE_HEADER = (
+    "Indoor Niche Lab brand style v1, editorial photorealism, soft natural light, moderate depth of field, "
+    "neutral warm color temperature, clean controlled background, realistic textures, commercial composition, "
+    "no visible text, no logos, no watermark."
+)
+NEGATIVE_PROMPT = (
+    "no visible text, no logos, no watermark, no brand marks, no distorted anatomy, no surreal objects, "
+    "no CGI/cartoon look, no noisy artifacts"
+)
 
 
 @dataclass(frozen=True)
 class SlotSpec:
+    slot_id: str
     section: str
-    slot: str
-    alt: str
+    entity: dict[str, object]
     prompt: str
-    source_template: str
+    alt: str
     sizes: tuple[str, ...]
 
-    @property
-    def slot_key(self) -> str:
-        return f"{self.section}.{self.slot}"
+
+@dataclass(frozen=True)
+class GenerationOptions:
+    mock: bool
+    force: bool
+    optimize_existing: bool
 
 
-HOME_SLOTS: list[SlotSpec] = [
-    SlotSpec("home", "hero", "Persona cosechando hongos gourmet frescos en una cocina de hogar", "Fotografía realista, cocina hogareña, persona cosechando hongos gourmet sobre tabla de madera, luz natural cálida, estética limpia, sin marcas, sin texto.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "beneficios-1", "Kit de cultivo indoor listo para comenzar sobre mesa de trabajo", "Fotografía realista de kit de cultivo de hongos gourmet sobre mesa, elementos ordenados, luz natural, estilo e-commerce premium, sin logos.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "beneficios-2", "Cosecha abundante de hongos gourmet recién cortados", "Fotografía realista de bandeja con hongos ostra/shiitake recién cosechados en cocina, enfoque nítido, luz cálida.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "beneficios-3", "Persona recibiendo asesoría de soporte para cultivo por mensaje", "Fotografía realista de manos usando celular con guía/tutorial, ambiente de cocina, sensación de acompañamiento, sin texto en pantalla.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "como-funciona-1", "Entrega de kit de cultivo listo para abrir en el hogar", "Fotografía realista de paquete o box de kit llegando a casa, manos recibiendo, puerta o mesa de entrada, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "como-funciona-2", "Seguimiento de checklist de cultivo en una guía impresa", "Fotografía realista de checklist o guía impresa junto al kit, manos señalando pasos, mesa limpia, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "como-funciona-3", "Resultado final de hongos gourmet cosechados en cocina", "Fotografía realista de hongos gourmet listos para cocinar en sartén o plato, estética casera premium, luz cálida.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "testimonios-1", "Foto de Andrea cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: manos cocinando hongos gourmet con kit en uso al fondo, luz natural cálida, sin primer plano de rostro, sin deformaciones.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "testimonios-2", "Foto de Martín cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: persona de espaldas preparando kit de cultivo sobre mesada, composición limpia, luz natural, sin primer plano de rostro.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "testimonios-3", "Foto de Lucía cliente de Indoor Niche Lab", "Fotografía realista testimonial en cocina hogareña: plato final con hongos gourmet y manos sirviendo, estética cálida, coherente con dirección de arte del sitio.", "app/templates/home.html", ("sm", "md", "lg")),
-    SlotSpec("home", "faq", "Mesa limpia de soporte y preguntas frecuentes", "Fotografía realista de mesa de cocina limpia con kit y una libreta o agenda, sensación de orden y claridad, luz natural.", "app/templates/home.html", ("sm", "md", "lg")),
-]
+def _output_file(section: str, slot: str, size: str) -> Path:
+    return OUTPUT_ROOT / section / slot / f"{size}.webp"
 
-SIZES = {"sm": (640, 426), "md": (1024, 683), "lg": (1536, 1024)}
+
+def _build_prompt(scene: str, composition: str, constraints: str) -> str:
+    return f"{STYLE_HEADER} Scene content: {scene} Composition cues: {composition} Constraints: {constraints}"
+
+
+def _home_slots() -> list[SlotSpec]:
+    scenes = [
+        ("hero", "Persona cosechando hongos gourmet en cocina doméstica ordenada."),
+        ("beneficios-1", "Kit de cultivo completo sobre mesa limpia con componentes ordenados."),
+        ("beneficios-2", "Cosecha fresca de hongos gourmet en bandeja sobre mesada."),
+        ("beneficios-3", "Soporte de cultivo con móvil y guía junto al kit."),
+        ("como-funciona-1", "Entrega de kit listo para abrir en hogar."),
+        ("como-funciona-2", "Seguimiento de checklist de cultivo en mesa limpia."),
+        ("como-funciona-3", "Resultado final listo para cocinar con hongos cosechados."),
+        ("testimonios-1", "Escena testimonial cocinando hongos con kit al fondo."),
+        ("testimonios-2", "Escena testimonial preparando kit sobre mesada."),
+        ("testimonios-3", "Escena testimonial sirviendo plato con hongos gourmet."),
+        ("faq", "Mesa ordenada de soporte de cultivo con libreta y kit."),
+    ]
+    rows: list[SlotSpec] = []
+    for slot, scene in scenes:
+        rows.append(
+            SlotSpec(
+                slot_id=f"home.{slot}",
+                section="home",
+                entity={"type": "page", "id": None, "slug": "home"},
+                prompt=_build_prompt(scene, "medium shot, balanced framing, soft shadows.", "no text overlays, no logos, no brand labels."),
+                alt=scene,
+                sizes=("sm", "md", "lg"),
+            )
+        )
+    return rows
 
 
 def _dynamic_slots() -> list[SlotSpec]:
     slots: list[SlotSpec] = [
-        SlotSpec("stages", "hero", "Portada de etapas de cultivo de hongos gourmet", "Fotografía realista de una secuencia de cultivo indoor de hongos gourmet, ambiente limpio, luz natural y estética editorial premium.", "app/templates/stage_list.html", ("sm", "md", "lg")),
-        SlotSpec("kits", "hero", "Portada de kits de cultivo indoor", "Fotografía realista de kits de cultivo de hongos gourmet alineados sobre mesa de trabajo, iluminación cálida, estilo e-commerce premium.", "app/templates/kit_list.html", ("sm", "md", "lg")),
-        SlotSpec("products", "hero", "Portada de productos para cultivo indoor", "Fotografía realista de productos e insumos de cultivo indoor organizados en composición de catálogo sobre fondo neutro.", "app/templates/product_list.html", ("sm", "md", "lg")),
+        SlotSpec(
+            slot_id="stages.hero",
+            section="stages",
+            entity={"type": "page", "id": None, "slug": "stages"},
+            prompt=_build_prompt(
+                "Resumen visual de etapas del cultivo indoor de hongos gourmet en estación doméstica controlada.",
+                "wide editorial shot with depth layers.",
+                "no text, no logos.",
+            ),
+            alt="Portada de etapas de cultivo indoor.",
+            sizes=("sm", "md", "lg"),
+        ),
+        SlotSpec(
+            slot_id="kits.hero",
+            section="kits",
+            entity={"type": "page", "id": None, "slug": "kits"},
+            prompt=_build_prompt(
+                "Kits de cultivo alineados sobre mesa limpia con componentes visibles.",
+                "catalog wide shot with controlled background.",
+                "no text, no logos.",
+            ),
+            alt="Portada de kits de cultivo indoor.",
+            sizes=("sm", "md", "lg"),
+        ),
+        SlotSpec(
+            slot_id="products.hero",
+            section="products",
+            entity={"type": "page", "id": None, "slug": "products"},
+            prompt=_build_prompt(
+                "Surtido de productos de cultivo indoor ordenados como catálogo.",
+                "wide product layout on neutral surface.",
+                "no text, no logos.",
+            ),
+            alt="Portada de productos para cultivo indoor.",
+            sizes=("sm", "md", "lg"),
+        ),
     ]
 
     for stage in list_stages():
-        slot = entity_slot("stage", stage.id, stage.name)
+        stage_slot = entity_slot("stage", stage.id, stage.name)
+        stage_entity = {"type": "stage", "id": stage.id, "slug": slugify(stage.name)}
         slots.append(
             SlotSpec(
-                "stages",
-                slot,
-                f"Imagen de la etapa {stage.name}",
-                f"Fotografía realista de la etapa '{stage.name}' del cultivo de hongos gourmet, contexto doméstico controlado, luz natural y enfoque detallado.",
-                "app/templates/stage_list.html",
-                ("md", "lg"),
+                slot_id=f"stages.{stage_slot}",
+                section="stages",
+                entity=stage_entity,
+                prompt=_build_prompt(
+                    f"Etapa completa '{stage.name}' del cultivo indoor, mostrando herramientas y entorno controlado.",
+                    "medium editorial angle, natural highlights.",
+                    "no text, no logos.",
+                ),
+                alt=f"Etapa {stage.name} en entorno real.",
+                sizes=("md", "lg"),
             )
         )
+        for card in ("card-1", "card-2"):
+            slots.append(
+                SlotSpec(
+                    slot_id=f"stages.{stage_slot}-{card}",
+                    section="stages",
+                    entity=stage_entity,
+                    prompt=_build_prompt(
+                        f"Vista {card} de la etapa '{stage.name}', variación complementaria de la fase.",
+                        "close-medium shot with negative space.",
+                        "no text, no logos.",
+                    ),
+                    alt=f"Tarjeta {card} de la etapa {stage.name}.",
+                    sizes=("md",),
+                )
+            )
+
+        for step in list_steps_by_stage(stage.id):
+            step_slot = entity_slot("step", step.id, step.title)
+            context = (step.content or "").strip().replace("\n", " ")[:220]
+            tools = ", ".join(step.tools_json or [])
+            for card in ("card-1", "card-2"):
+                slots.append(
+                    SlotSpec(
+                        slot_id=f"stages.{step_slot}-{card}",
+                        section="stages",
+                        entity={"type": "step", "id": step.id, "slug": slugify(step.title)},
+                        prompt=_build_prompt(
+                            f"Paso '{step.title}' de la etapa '{stage.name}'. Context: {context}. Tools: {tools}.",
+                            "process-focused close shot suitable for tutorial card.",
+                            "no text, no logos, no watermarks.",
+                        ),
+                        alt=f"Paso {step.title}, imagen {card}.",
+                        sizes=("md",),
+                    )
+                )
 
     for kit in list_kits():
         slot = entity_slot("kit", kit.id, kit.name)
+        entity = {"type": "kit", "id": kit.id, "slug": slugify(kit.name)}
         slots.append(
             SlotSpec(
-                "kits",
-                slot,
-                f"Kit {kit.name} en entorno real",
-                f"Fotografía realista del kit '{kit.name}' para cultivo indoor de hongos gourmet sobre superficie de cocina limpia, luz natural, estilo de catálogo.",
-                "app/templates/kit_list.html",
-                ("md",),
+                slot_id=f"kits.{slot}",
+                section="kits",
+                entity=entity,
+                prompt=_build_prompt(
+                    f"Kit '{kit.name}' con componentes ordenados sobre mesa limpia.",
+                    "product editorial shot.",
+                    "no text, no logos.",
+                ),
+                alt=f"Kit {kit.name} en entorno real.",
+                sizes=("md", "lg"),
+            )
+        )
+        result_slot = entity_slot("kit-result", kit.id, kit.name)
+        slots.append(
+            SlotSpec(
+                slot_id=f"kits.{result_slot}",
+                section="kits",
+                entity=entity,
+                prompt=_build_prompt(
+                    f"Resultado de cosecha asociado al kit '{kit.name}', hongos frescos y presentación limpia.",
+                    "medium close-up with natural light.",
+                    "no text, no logos.",
+                ),
+                alt=f"Resultado final del kit {kit.name}.",
+                sizes=("md",),
             )
         )
 
     for product in list_products():
+        slot = entity_slot("product", product.id, product.name)
         slots.append(
             SlotSpec(
-                "products",
-                entity_slot("product", product.id, product.name),
-                f"Producto {product.name}",
-                f"Fotografía realista del producto '{product.name}' para cultivo indoor de hongos gourmet, toma tipo e-commerce con fondo neutro y luz de estudio suave.",
-                "app/templates/product_list.html",
-                ("md",),
+                slot_id=f"products.{slot}",
+                section="products",
+                entity={"type": "product", "id": product.id, "slug": slugify(product.name)},
+                prompt=_build_prompt(
+                    f"Producto '{product.name}' de categoría '{product.category}' aislado en fondo neutro con iluminación suave.",
+                    "catalog product shot, high texture realism.",
+                    "no text, no logos.",
+                ),
+                alt=f"Producto {product.name} sobre fondo neutro.",
+                sizes=("md",),
             )
         )
 
     return slots
 
 
-def _selected_slots(only: str) -> list[SlotSpec]:
-    all_slots = HOME_SLOTS + _dynamic_slots()
-    if only == "all":
-        return all_slots
-    return [slot for slot in all_slots if slot.section == only]
+def _all_slots() -> list[SlotSpec]:
+    rows = _home_slots() + _dynamic_slots()
+    rows.sort(key=lambda x: x.slot_id)
+    return rows
 
 
-def _slot_dir(section: str, slot: str) -> Path:
-    return OUTPUT_ROOT / section / slot
+def _load_manifest() -> dict:
+    if not MANIFEST_PATH.exists():
+        return {"manifest_version": 2, "style_id": STYLE_ID, "generated_at": "", "slots": []}
+    payload = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    if isinstance(payload, dict) and isinstance(payload.get("slots"), list):
+        return payload
+    if isinstance(payload, dict) and isinstance(payload.get("items"), list):
+        # migrate legacy lightweight structure
+        migrated = {"manifest_version": 2, "style_id": STYLE_ID, "generated_at": "", "slots": []}
+        grouped: dict[str, dict] = {}
+        for item in payload["items"]:
+            section = item.get("section")
+            slot = item.get("slot")
+            if not section or not slot:
+                continue
+            slot_id = f"{section}.{slot}"
+            row = grouped.setdefault(
+                slot_id,
+                {
+                    "slot_id": slot_id,
+                    "section": section,
+                    "entity": {"type": "unknown", "id": None, "slug": None},
+                    "prompt": "",
+                    "negative_prompt": NEGATIVE_PROMPT,
+                    "alt": "",
+                    "style_id": STYLE_ID,
+                    "model": DEFAULT_MODEL,
+                    "created_at": "",
+                    "updated_at": "",
+                    "output_files": {},
+                    "status": "missing",
+                    "error_message": None,
+                },
+            )
+            if item.get("size") and item.get("url"):
+                row["output_files"][item["size"]] = item["url"]
+        migrated["slots"] = sorted(grouped.values(), key=lambda x: x["slot_id"])
+        return migrated
+    raise SystemExit("Manifest inválido")
 
 
-def _output_files(section: str, slot: str, sizes: tuple[str, ...]) -> dict[str, Path]:
-    base = _slot_dir(section, slot)
-    return {k: base / f"{k}.webp" for k in sizes}
+def _save_manifest(payload: dict) -> None:
+    payload["generated_at"] = datetime.now(timezone.utc).isoformat()
+    payload["style_id"] = STYLE_ID
+    payload["manifest_version"] = 2
+    payload["slots"] = sorted(payload.get("slots", []), key=lambda x: x.get("slot_id", ""))
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _is_complete(section: str, slot: str, sizes: tuple[str, ...]) -> bool:
-    return all(path.exists() and path.stat().st_size > 0 for path in _output_files(section, slot, sizes).values())
+def _index_manifest(payload: dict) -> dict[str, dict]:
+    return {row.get("slot_id", ""): row for row in payload.get("slots", []) if row.get("slot_id")}
+
+
+def _is_complete(section: str, slot_name: str, sizes: tuple[str, ...]) -> bool:
+    return all(_output_file(section, slot_name, size).exists() and _output_file(section, slot_name, size).stat().st_size > 0 for size in sizes)
+
+
+def _generate_mock_png(slot_id: str, prompt: str) -> bytes:
+    image = Image.new("RGB", (1536, 1024), color=(228, 216, 194))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((60, 60, 1476, 964), outline=(120, 95, 65), width=5)
+    draw.text((100, 120), f"MOCK {slot_id}", fill=(88, 64, 40))
+    draw.text((100, 190), prompt[:220], fill=(88, 64, 40))
+    buf = BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 def _generate_real_png(client, prompt: str) -> bytes:
-    result = client.images.generate(model=MODEL, prompt=prompt, size="1536x1024", quality="high")
+    result = client.images.generate(model=DEFAULT_MODEL, prompt=prompt, size="1536x1024", quality="high")
     b64 = result.data[0].b64_json
     if not b64:
         raise RuntimeError("OpenAI no devolvió b64_json")
     return base64.b64decode(b64)
 
 
-def _generate_mock_png(slot: str, prompt: str) -> bytes:
-    w, h = 1536, 1024
-    image = Image.new("RGB", (w, h), color=(228, 216, 194))
-    draw = ImageDraw.Draw(image)
-    draw.rectangle((60, 60, w - 60, h - 60), outline=(120, 95, 65), width=5)
-    draw.text((100, 120), f"MOCK {slot}", fill=(88, 64, 40))
-    draw.text((100, 190), prompt[:180], fill=(88, 64, 40))
-    buf = BytesIO()
-    image.save(buf, format="PNG")
-    return buf.getvalue()
+def _save_variants(png_bytes: bytes, section: str, slot_name: str, sizes: tuple[str, ...]) -> dict[str, str]:
+    with Image.open(BytesIO(png_bytes)) as source_image:
+        rgb = source_image.convert("RGB")
+        output: dict[str, str] = {}
+        for size in sizes:
+            width, height = SIZE_DIMS[size]
+            target = _output_file(section, slot_name, size)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            variant = rgb.resize((width, height), Image.Resampling.LANCZOS)
+            variant.save(target, format="WEBP", quality=82, method=6)
+            output[size] = f"/static/{target.relative_to(ROOT / 'app' / 'static').as_posix()}"
+        return output
 
 
-def _save_webp_variants(png_bytes: bytes, section: str, slot: str, sizes: tuple[str, ...]) -> dict[str, str]:
-    out = _output_files(section, slot, sizes)
-    out[next(iter(out))].parent.mkdir(parents=True, exist_ok=True)
-    with Image.open(BytesIO(png_bytes)) as image:
-        source = image.convert("RGB")
-        public: dict[str, str] = {}
-        for size_name in sizes:
-            dims = SIZES[size_name]
-            variant = source.resize(dims, Image.Resampling.LANCZOS)
-            variant.save(out[size_name], format="WEBP", quality=82, method=6)
-            public[size_name] = str(out[size_name].relative_to(ROOT))
-            print(f"[images] Archivo creado correctamente: {out[size_name]}")
-        return public
-
-
-def _load_manifest() -> list[dict]:
-    if not MANIFEST_PATH.exists():
-        return []
-    try:
-        data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            items = data.get("items", [])
-            return items if isinstance(items, list) else []
-        return []
-    except Exception:
-        return []
-
-
-def _build_manifest_items(rows: list[dict]) -> list[dict]:
-    items: list[dict] = []
-    for row in rows:
-        slot_key = str(row.get("slot", ""))
-        if "." not in slot_key:
+def _optimize_existing(section: str, slot_name: str, sizes: tuple[str, ...]) -> dict[str, str]:
+    output: dict[str, str] = {}
+    for size in sizes:
+        target = _output_file(section, slot_name, size)
+        if not target.exists() or target.stat().st_size <= 0:
             continue
-        section, slot = slot_key.split(".", 1)
-        output_files = row.get("output_files", {})
-        if not isinstance(output_files, dict):
-            continue
-        for size, relative in output_files.items():
-            rel = Path(str(relative))
-            abs_path = ROOT / rel
-            bytes_size = abs_path.stat().st_size if abs_path.exists() else 0
-            static_relative = rel.as_posix().removeprefix("app/static/")
-            items.append(
-                {
-                    "section": section,
-                    "slot": slot,
-                    "size": size,
-                    "path": rel.as_posix(),
-                    "url": f"/static/{static_relative}",
-                    "bytes": bytes_size,
-                }
-            )
-    items.sort(key=lambda item: (item["section"], item["slot"], item["size"]))
-    return items
-
-
-def _write_manifest(rows: list[dict]) -> None:
-    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "version": 1,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "items": _build_manifest_items(rows),
-    }
-    MANIFEST_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
-
-
-def _upsert_manifest(manifest: list[dict], row: dict) -> None:
-    for idx, existing in enumerate(manifest):
-        if existing.get("slot") == row.get("slot"):
-            manifest[idx] = row
-            return
-    manifest.append(row)
-
-
-def sanity_check_outputs(manifest: list[dict]) -> tuple[int, list[str]]:
-    stale_slots: list[str] = []
-    for row in manifest:
-        slot = row.get("slot", "")
-        output_files = row.get("output_files", {})
-        if not isinstance(output_files, dict) or not output_files:
-            continue
-        missing = False
-        for relative in output_files.values():
-            output_path = ROOT / str(relative)
-            if not output_path.exists() or output_path.stat().st_size <= 0:
-                missing = True
-                break
-        if missing:
-            stale_slots.append(slot)
-    print(f"[images] sanity_check_outputs: stale={len(stale_slots)}")
-    return len(stale_slots), stale_slots
-
-
-def migrate_legacy_map_to_new_layout() -> None:
-    legacy_map = ROOT / "data/generated_images_map.json"
-    if not legacy_map.exists():
-        return
-
-    try:
-        data = json.loads(legacy_map.read_text(encoding="utf-8"))
-    except Exception as exc:
-        print(f"[images] legacy_map unreadable: {exc}")
-        return
-
-    stage_rows = sorted(list_stages(), key=lambda row: (row.order_index, row.id or 0))
-    product_rows = sorted(list_products(), key=lambda row: (row.category, row.name, row.id or 0))
-
-    migrated = 0
-    ignored = 0
-    for entries in data.values() if isinstance(data, dict) else []:
-        if not isinstance(entries, list):
-            continue
-        for entry in entries:
-            target = str(entry.get("target", ""))
-            if not target.startswith("/static/img/generated/"):
-                continue
-            filename = Path(target).name
-            m = re.match(r"^(stage_list|product_list|stage_detail)-(\d+)-.+-(sm|md|lg)\.webp$", filename)
-            if not m:
-                ignored += 1
-                continue
-
-            kind, idx_s, size = m.groups()
-            idx = int(idx_s) - 1
-            if kind in {"stage_list", "stage_detail"}:
-                if idx < 0 or idx >= len(stage_rows):
-                    ignored += 1
-                    continue
-                slot = entity_slot("stage", stage_rows[idx].id, stage_rows[idx].name)
-                dest = OUTPUT_ROOT / "stages" / slot / f"{size}.webp"
-            else:
-                if idx < 0 or idx >= len(product_rows):
-                    ignored += 1
-                    continue
-                slot = entity_slot("product", product_rows[idx].id, product_rows[idx].name)
-                dest = OUTPUT_ROOT / "products" / slot / f"{size}.webp"
-
-            src = ROOT / "app" / "static" / target.removeprefix("/static/")
-            if not src.exists() or src.stat().st_size <= 0:
-                ignored += 1
-                continue
-
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            if not dest.exists() or dest.stat().st_size <= 0:
-                shutil.copy2(src, dest)
-                migrated += 1
-
-    print(f"[images] legacy_migration migrated={migrated} ignored={ignored}")
-
-
-def generate_slots(slots: list[SlotSpec], mock: bool, force: bool) -> tuple[dict[str, int], list[str]]:
-    manifest = _load_manifest()
-    _, stale_slots = sanity_check_outputs(manifest)
-
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-
-    counters = {"generated": 0, "skipped-existing": 0, "regenerated-stale": 0, "failed": 0}
-    failures: list[str] = []
-
-    client = None
-    if not mock:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
-    stale_set = set(stale_slots)
-
-    for spec in slots:
-        files = _output_files(spec.section, spec.slot, spec.sizes)
-        slot_key = spec.slot_key
-        output_dir = files["md"].parent
-        prompt_preview = spec.prompt.replace("\n", " ")[:120]
-
-        try:
-            is_complete = _is_complete(spec.section, spec.slot, spec.sizes)
-            if is_complete and not force:
-                status = "skipped-existing"
-                counters[status] += 1
-                print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result={status}")
-                row = {
-                    "slot": slot_key,
-                    "prompt": spec.prompt,
-                    "alt": spec.alt,
-                    "model": "mock" if mock else MODEL,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "source_template": spec.source_template,
-                    "output_files": {k: str(v.relative_to(ROOT)) for k, v in files.items()},
-                    "status": status,
-                }
-                _upsert_manifest(manifest, row)
-                continue
-
-            stale = slot_key in stale_set and not force
-            if stale:
-                print(f"[images] slot={slot_key} detectado como stale_missing. Regenerando...")
-
-            print(f"[images] Generando imagen para sección: {slot_key}")
-            print(f"[images] Guardando en: {output_dir}")
-            png = _generate_mock_png(slot_key, spec.prompt) if mock else _generate_real_png(client, spec.prompt)
-            saved = _save_webp_variants(png, spec.section, spec.slot, spec.sizes)
-
-            status = "regenerated-stale" if stale else "generated"
-            counters[status] += 1
-            print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result={status}")
-            row = {
-                "slot": slot_key,
-                "prompt": spec.prompt,
-                "alt": spec.alt,
-                "model": "mock" if mock else MODEL,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "source_template": spec.source_template,
-                "output_files": saved,
-                "status": status,
-            }
-            _upsert_manifest(manifest, row)
-        except Exception as exc:
-            counters["failed"] += 1
-            failures.append(f"{slot_key}: {exc}")
-            print(f"[images] slot={slot_key} prompt='{prompt_preview}' out={output_dir} result=failed error={exc}")
-
-    manifest.sort(key=lambda x: x.get("slot", ""))
-    _write_manifest(manifest)
-    return counters, failures
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generador IA de imágenes por slots para el sitio.")
-    parser.add_argument("--only", choices=["all", "home", "stages", "kits", "products"], default="all")
-    parser.add_argument("--mock", action="store_true", help="Genera placeholders locales sin API key")
-    parser.add_argument("--real", action="store_true", help="Genera imágenes reales con OpenAI")
-    parser.add_argument("--force", action="store_true", help="Regenera aunque existan archivos")
-    return parser.parse_args()
+        with Image.open(target) as source:
+            source.convert("RGB").save(target, format="WEBP", quality=80, method=6)
+        output[size] = f"/static/{target.relative_to(ROOT / 'app' / 'static').as_posix()}"
+    return output
 
 
 def _resolve_mode(args: argparse.Namespace) -> bool:
     has_key = bool(os.environ.get("OPENAI_API_KEY"))
     if args.mock and args.real:
         raise SystemExit("Elegí solo un modo: --mock o --real")
+    if args.real and not has_key:
+        raise SystemExit("Falta OPENAI_API_KEY. No se puede usar --real sin API key")
     if args.mock:
-        print("[images] mode=MOCK (forced by --mock)")
         return True
     if args.real:
-        if not has_key:
-            raise SystemExit("Falta OPENAI_API_KEY. No se puede usar --real sin API key")
-        print("[images] mode=REAL (forced by --real)")
         return False
-    if has_key:
-        print("[images] mode=REAL (OPENAI_API_KEY present)")
-        return False
-    print("[images] mode=MOCK (reason=OPENAI_API_KEY missing)")
-    return True
+    return not has_key
 
 
-def _count_generated_files() -> int:
-    return sum(1 for path in OUTPUT_ROOT.rglob("*.webp") if path.is_file() and path.stat().st_size > 0)
+def _filter_slots(all_slots: list[SlotSpec], only: str, only_slot: str | None) -> list[SlotSpec]:
+    selected = all_slots
+    if only != "all":
+        selected = [slot for slot in selected if slot.section == only]
+    if only_slot:
+        selected = [slot for slot in selected if slot.slot_id == only_slot]
+    return selected
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generador idempotente de imágenes por slot")
+    parser.add_argument("--only", choices=["all", "home", "stages", "kits", "products"], default="all")
+    parser.add_argument("--only-slot", help="Genera solo el slot_id exacto (ej: stages.step-incubacion-10-card-1)")
+    parser.add_argument("--mock", action="store_true", help="Usa placeholders locales")
+    parser.add_argument("--real", action="store_true", help="Usa OpenAI")
+    parser.add_argument("--force", action="store_true", help="Regenera aunque existan archivos")
+    parser.add_argument("--optimize-existing", action="store_true", help="Recomprime WEBP existentes sin regenerar prompt")
+    return parser.parse_args()
+
+
+def generate(slots: list[SlotSpec], options: GenerationOptions) -> tuple[dict[str, int], list[str]]:
+    payload = _load_manifest()
+    manifest_map = _index_manifest(payload)
+    counters = {"generated": 0, "skipped": 0, "optimized": 0, "failed": 0}
+    failures: list[str] = []
+
+    client = None
+    if not options.mock:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    for slot in slots:
+        section, slot_name = slot.slot_id.split(".", 1)
+        existing = manifest_map.get(slot.slot_id, {})
+        created_at = existing.get("created_at") or now
+        try:
+            complete = _is_complete(section, slot_name, slot.sizes)
+            if complete and not options.force:
+                if options.optimize_existing:
+                    output_files = _optimize_existing(section, slot_name, slot.sizes)
+                    status = "ok"
+                    counters["optimized"] += 1
+                else:
+                    output_files = {
+                        size: f"/static/{_output_file(section, slot_name, size).relative_to(ROOT / 'app' / 'static').as_posix()}"
+                        for size in slot.sizes
+                    }
+                    status = "ok"
+                    counters["skipped"] += 1
+            else:
+                png = _generate_mock_png(slot.slot_id, slot.prompt) if options.mock else _generate_real_png(client, slot.prompt)
+                output_files = _save_variants(png, section, slot_name, slot.sizes)
+                status = "ok"
+                counters["generated"] += 1
+
+            manifest_map[slot.slot_id] = {
+                "slot_id": slot.slot_id,
+                "section": slot.section,
+                "entity": slot.entity,
+                "prompt": slot.prompt,
+                "negative_prompt": NEGATIVE_PROMPT,
+                "alt": slot.alt,
+                "style_id": STYLE_ID,
+                "model": "mock" if options.mock else DEFAULT_MODEL,
+                "created_at": created_at,
+                "updated_at": now,
+                "output_files": output_files,
+                "status": status,
+                "error_message": None,
+            }
+            print(f"[images] {slot.slot_id} -> {status}")
+        except Exception as exc:
+            counters["failed"] += 1
+            failures.append(f"{slot.slot_id}: {exc}")
+            previous_output = existing.get("output_files", {}) if isinstance(existing, dict) else {}
+            manifest_map[slot.slot_id] = {
+                "slot_id": slot.slot_id,
+                "section": slot.section,
+                "entity": slot.entity,
+                "prompt": slot.prompt,
+                "negative_prompt": NEGATIVE_PROMPT,
+                "alt": slot.alt,
+                "style_id": STYLE_ID,
+                "model": "mock" if options.mock else DEFAULT_MODEL,
+                "created_at": created_at,
+                "updated_at": now,
+                "output_files": previous_output,
+                "status": "error",
+                "error_message": str(exc),
+            }
+            print(f"[images] {slot.slot_id} -> error: {exc}")
+
+    payload["slots"] = list(manifest_map.values())
+    _save_manifest(payload)
+    return counters, failures
 
 
 def main() -> None:
     args = parse_args()
-    use_mock = _resolve_mode(args)
-    migrate_legacy_map_to_new_layout()
+    mock = _resolve_mode(args)
+    all_slots = _all_slots()
+    selected = _filter_slots(all_slots, args.only, args.only_slot)
+    if args.only_slot and not selected:
+        raise SystemExit(f"No existe slot_id: {args.only_slot}")
 
-    slots = _selected_slots(args.only)
-    counters, failures = generate_slots(slots=slots, mock=use_mock, force=args.force)
+    counters, failures = generate(
+        slots=selected,
+        options=GenerationOptions(mock=mock, force=args.force, optimize_existing=args.optimize_existing),
+    )
 
-    total_files = _count_generated_files()
     print(
-        "[images] resumen "
-        f"generated={counters.get('generated', 0)} "
-        f"skipped-existing={counters.get('skipped-existing', 0)} "
-        f"regenerated-stale={counters.get('regenerated-stale', 0)} "
-        f"failed={counters.get('failed', 0)} "
-        f"files_on_disk={total_files}"
+        "[images] summary "
+        f"generated={counters['generated']} skipped={counters['skipped']} "
+        f"optimized={counters['optimized']} failed={counters['failed']}"
     )
     if failures:
-        print("[images] fallas detectadas:")
-        for item in failures:
-            print(f" - {item}")
-
-    if not use_mock and total_files == 0:
-        raise SystemExit("Ejecución REAL sin archivos generados: verifique OPENAI_API_KEY, cuotas y errores previos")
-
-    if counters.get("failed", 0) > 0:
+        for failure in failures:
+            print(f" - {failure}")
         raise SystemExit("Generación completada con fallas")
-
     print("Generación completada")
 
 

@@ -17,6 +17,7 @@ from app.services.image_resolver import (
     stage_hero_image,
     stage_list_images,
     step_image,
+    step_image_cards,
 )
 
 router = APIRouter()
@@ -76,6 +77,7 @@ def stage_detail(stage_id: int, request: Request):
             "tools_json": step.tools_json,
             "estimated_cost_usd": step.estimated_cost_usd,
             "image_path": step_image(step, stage=stage),
+            "image_cards": step_image_cards(step, stage=stage),
         }
         for step in steps
     ]
