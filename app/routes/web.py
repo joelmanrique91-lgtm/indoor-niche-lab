@@ -13,6 +13,7 @@ from app.services.image_resolver import (
     kit_card_image,
     kit_result_image,
     resolve_static_path,
+    resolution_debug,
     stage_hero_image,
     stage_list_images,
     step_image,
@@ -20,6 +21,9 @@ from app.services.image_resolver import (
 
 router = APIRouter()
 
+
+def _static_url(request: Request, path: str) -> str:
+    return str(request.app.url_path_for("static", path=path))
 
 
 def _home_images() -> dict[str, str]:
@@ -71,7 +75,7 @@ def stage_detail(stage_id: int, request: Request):
             "content": step.content,
             "tools_json": step.tools_json,
             "estimated_cost_usd": step.estimated_cost_usd,
-            "image_url": step_image(step),
+            "image_path": step_image(step, stage=stage),
         }
         for step in steps
     ]
@@ -81,7 +85,7 @@ def stage_detail(stage_id: int, request: Request):
             "request": request,
             "stage": stage,
             "steps": step_rows,
-            "stage_image_url": stage_hero_image(stage),
+            "stage_image_path": stage_hero_image(stage),
         },
     )
 
@@ -116,11 +120,47 @@ def kits(request: Request):
                 "description": kit.description,
                 "price": kit.price,
                 "components_json": kit.components_json,
-                "image_url": kit_card_image(kit),
-                "result_image_url": kit_result_image(kit),
+                "image_path": kit_card_image(kit),
+                "result_image_path": kit_result_image(kit),
             }
         )
     return templates.TemplateResponse("kit_list.html", {"request": request, "kits": kit_rows, "hero_path": resolve_static_path("kits", "hero", "md")})
+
+
+@router.get("/debug/image-bindings")
+def debug_image_bindings(request: Request, stage_id: int | None = None, kit_id: int | None = None):
+    rows: list[dict[str, object]] = []
+
+    if stage_id is not None:
+        stage = get_stage(stage_id)
+        if not stage:
+            raise HTTPException(status_code=404, detail="Etapa no encontrada")
+        stage_slot = entity_slot("stage", stage.id, stage.name)
+        rows.append({"entity": f"stage:{stage.id}", "kind": "hero", **resolution_debug("stages", stage_slot, stage.image_hero)})
+        rows.append({"entity": f"stage:{stage.id}", "kind": "card-1", **resolution_debug("stages", f"{stage_slot}-card-1", stage.image_card_1)})
+        rows.append({"entity": f"stage:{stage.id}", "kind": "card-2", **resolution_debug("stages", f"{stage_slot}-card-2", stage.image_card_2)})
+
+        for step in list_steps_by_stage(stage_id):
+            step_slot = entity_slot("step", step.id, step.title)
+            debug_row = resolution_debug("stages", step_slot, step.image)
+            rows.append({"entity": f"step:{step.id}", "kind": "step", **debug_row})
+
+    if kit_id is not None:
+        kit = next((item for item in list_kits() if item.id == kit_id), None)
+        if not kit:
+            raise HTTPException(status_code=404, detail="Kit no encontrado")
+        kit_slot = entity_slot("kit", kit.id, kit.name)
+        result_slot = entity_slot("kit-result", kit.id, kit.name)
+        rows.append({"entity": f"kit:{kit.id}", "kind": "main", **resolution_debug("kits", kit_slot, kit.image_card)})
+        rows.append({"entity": f"kit:{kit.id}", "kind": "result", **resolution_debug("kits", result_slot, kit.image_result)})
+
+    if stage_id is None and kit_id is None:
+        return {"hint": "Pasá stage_id y/o kit_id en query params", "rows": rows}
+
+    for row in rows:
+        row["public_url"] = _static_url(request, row["selected_path"])
+
+    return {"stage_id": stage_id, "kit_id": kit_id, "rows": rows}
 
 
 @router.get("/debug/static-check")

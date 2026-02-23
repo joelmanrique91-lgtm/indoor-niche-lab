@@ -44,25 +44,23 @@ def _first_existing_static_path(candidates: list[str], fallback: str) -> str:
     return fallback
 
 
-def _generated_candidates(section: str, slot: str, sizes: tuple[str, ...] = ("md", "lg")) -> list[str]:
+def _generated_candidates(section: str, slot: str, sizes: tuple[str, ...] = ("md", "lg", "sm")) -> list[str]:
     candidates: list[str] = []
     for size in sizes:
-        candidates.append(f"img/generated/{section}/{slot}/{size}.webp")
-        candidates.append(f"img/generated/{section}/{slot}/{size}.png")
-        candidates.append(f"img/generated/{section}/{slot}/{size}.jpg")
-        candidates.append(f"img/generated/{section}/{slot}/{size}.jpeg")
+        candidates.extend(
+            [
+                f"img/generated/{section}/{slot}/{size}.webp",
+                f"img/generated/{section}/{slot}/{size}.png",
+                f"img/generated/{section}/{slot}/{size}.jpg",
+                f"img/generated/{section}/{slot}/{size}.jpeg",
+            ]
+        )
     return candidates
 
 
 def resolve_static_path(section: str, slot: str, size: str = "md") -> str:
     fallback = PLACEHOLDERS["default"]
-    candidates = [
-        f"img/generated/{section}/{slot}/{size}.webp",
-        f"img/generated/{section}/{slot}/{size}.png",
-        f"img/generated/{section}/{slot}/{size}.jpg",
-        f"img/generated/{section}/{slot}/{size}.jpeg",
-    ]
-    return _first_existing_static_path(candidates, fallback)
+    return _first_existing_static_path(_generated_candidates(section, slot, sizes=(size, "md", "lg", "sm")), fallback)
 
 
 def resolve(section: str, slot: str, size: str = "md") -> str:
@@ -86,65 +84,105 @@ def _clean_user_path(raw_path: str | None) -> str | None:
     return cleaned
 
 
-def _prefer_user_or_generated(raw_path: str | None, generated_candidates: list[str], fallback: str) -> str:
+def _prefer_generated_then_user(
+    *,
+    generated_candidates: list[str],
+    raw_path: str | None,
+    fallback: str,
+) -> str:
     candidates: list[str] = []
+    candidates.extend(generated_candidates)
     cleaned = _clean_user_path(raw_path)
     if cleaned:
         candidates.append(cleaned)
-    candidates.extend(generated_candidates)
     return _first_existing_static_path(candidates, fallback)
 
 
 def stage_list_images(stage) -> dict[str, str]:
     slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None))
-    img1 = _prefer_user_or_generated(
-        getattr(stage, "image_card_1", None),
-        _generated_candidates("stages", f"{slot}-card-1"),
-        PLACEHOLDERS["stages_card_1"],
+    img1 = _prefer_generated_then_user(
+        generated_candidates=_generated_candidates("stages", f"{slot}-card-1") + _generated_candidates("stages", slot),
+        raw_path=getattr(stage, "image_card_1", None),
+        fallback=PLACEHOLDERS["stages_card_1"],
     )
-    img2 = _prefer_user_or_generated(
-        getattr(stage, "image_card_2", None),
-        _generated_candidates("stages", f"{slot}-card-2"),
-        PLACEHOLDERS["stages_card_2"],
+    img2 = _prefer_generated_then_user(
+        generated_candidates=_generated_candidates("stages", f"{slot}-card-2") + _generated_candidates("stages", slot),
+        raw_path=getattr(stage, "image_card_2", None),
+        fallback=PLACEHOLDERS["stages_card_2"],
     )
-    return {"img1_url": f"/static/{img1}", "img2_url": f"/static/{img2}"}
+    return {"img1_path": img1, "img2_path": img2}
 
 
 def stage_hero_image(stage) -> str:
     slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None))
-    resolved = _prefer_user_or_generated(
-        getattr(stage, "image_hero", None),
-        _generated_candidates("stages", slot, sizes=("lg", "md")),
-        PLACEHOLDERS["stages_hero"],
+    resolved = _prefer_generated_then_user(
+        generated_candidates=_generated_candidates("stages", slot),
+        raw_path=getattr(stage, "image_hero", None),
+        fallback=PLACEHOLDERS["stages_hero"],
     )
-    return f"/static/{resolved}"
+    return resolved
 
 
-def step_image(step) -> str:
+def step_image(step, stage=None) -> str:
     step_slot = entity_slot("step", getattr(step, "id", None), getattr(step, "title", None))
-    resolved = _prefer_user_or_generated(
-        getattr(step, "image", None),
-        _generated_candidates("stages", step_slot),
-        PLACEHOLDERS["step_default"],
+    stage_slot = entity_slot("stage", getattr(stage, "id", None), getattr(stage, "name", None)) if stage else ""
+    generated = _generated_candidates("stages", step_slot)
+    if stage_slot:
+        generated.extend(_generated_candidates("stages", stage_slot))
+
+    resolved = _prefer_generated_then_user(
+        generated_candidates=generated,
+        raw_path=getattr(step, "image", None),
+        fallback=PLACEHOLDERS["step_default"],
     )
-    return f"/static/{resolved}"
+    return resolved
 
 
 def kit_card_image(kit) -> str:
     slot = entity_slot("kit", getattr(kit, "id", None), getattr(kit, "name", None))
-    resolved = _prefer_user_or_generated(
-        getattr(kit, "image_card", None),
-        _generated_candidates("kits", slot),
-        PLACEHOLDERS["kits_card"],
+    resolved = _prefer_generated_then_user(
+        generated_candidates=_generated_candidates("kits", slot),
+        raw_path=getattr(kit, "image_card", None),
+        fallback=PLACEHOLDERS["kits_card"],
     )
-    return f"/static/{resolved}"
+    return resolved
 
 
 def kit_result_image(kit) -> str:
     slot = entity_slot("kit-result", getattr(kit, "id", None), getattr(kit, "name", None))
-    resolved = _prefer_user_or_generated(
-        getattr(kit, "image_result", None),
-        _generated_candidates("kits", slot),
-        PLACEHOLDERS["kits_result"],
+    resolved = _prefer_generated_then_user(
+        generated_candidates=_generated_candidates("kits", slot),
+        raw_path=getattr(kit, "image_result", None),
+        fallback=PLACEHOLDERS["kits_result"],
     )
-    return f"/static/{resolved}"
+    return resolved
+
+
+def resolution_debug(section: str, slot: str, raw_path: str | None = None) -> dict[str, object]:
+    generated_candidates = _generated_candidates(section, slot)
+    raw_candidate = _clean_user_path(raw_path)
+    chosen = _prefer_generated_then_user(
+        generated_candidates=generated_candidates,
+        raw_path=raw_path,
+        fallback=PLACEHOLDERS["default"],
+    )
+    checks = []
+    for candidate in generated_candidates + ([raw_candidate] if raw_candidate else []):
+        if not candidate:
+            continue
+        file_path = STATIC_ROOT / candidate
+        checks.append(
+            {
+                "path": candidate,
+                "exists": file_path.exists() and file_path.stat().st_size > 0 if file_path.exists() else False,
+                "url": f"/static/{candidate}",
+            }
+        )
+    return {
+        "section": section,
+        "slot": slot,
+        "raw_path": raw_candidate,
+        "selected_path": chosen,
+        "selected_url": f"/static/{chosen}",
+        "checks": checks,
+    }
