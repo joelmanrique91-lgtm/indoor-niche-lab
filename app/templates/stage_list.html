@@ -7,8 +7,8 @@
   {% for stage in stages %}
   <article class="card stage-item-card">
     <div class="stage-list-gallery">
-      <img class="stage-list-image" src="{{ stage.images.img1_url }}" alt="Cabecera 1 de {{ stage.name }}" loading="lazy">
-      <img class="stage-list-image" src="{{ stage.images.img2_url }}" alt="Cabecera 2 de {{ stage.name }}" loading="lazy">
+      <img class="stage-list-image" src="{{ url_for('static', path=stage.images.img1_path) }}" alt="Cabecera 1 de {{ stage.name }}" loading="lazy">
+      <img class="stage-list-image" src="{{ url_for('static', path=stage.images.img2_path) }}" alt="Cabecera 2 de {{ stage.name }}" loading="lazy">
     </div>
     <div class="stage-item-head">
       <h2>{{ stage.order_index }}. {{ stage.name }}</h2>

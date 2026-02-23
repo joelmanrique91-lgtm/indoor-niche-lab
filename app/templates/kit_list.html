@@ -8,7 +8,7 @@
   <article class="card kit-card">
     <img
       class="kit-hero-image"
-      src="{{ kit.image_url }}"
+      src="{{ url_for('static', path=kit.image_path) }}"
       alt="Kit completo {{ kit.name }} en entorno real con iluminación natural"
       loading="lazy"
     >
@@ -23,7 +23,7 @@
     </ul>
     <img
       class="kit-harvest-image"
-      src="{{ kit.result_image_url }}"
+      src="{{ url_for('static', path=kit.result_image_path) }}"
       alt="Resultado final de cosecha del {{ kit.name }}"
       loading="lazy"
     >
