@@ -142,6 +142,8 @@ python scripts\smoke_test.py
 pytest
 ```
 
+`smoke_test.py` intenta cargar `.env` si existe, pero también funciona sin ese archivo usando variables ya exportadas y valores por defecto.
+
 ## Linux/macOS
 Existe `uvicorn.sh` para arranque rápido en bash.
 
@@ -309,4 +311,3 @@ Comando opcional para recomprimir archivos ya generados sin pedir imágenes nuev
 ```powershell
 python .\scripts\generate_site_images.py --mock --optimize-existing
 ```
-

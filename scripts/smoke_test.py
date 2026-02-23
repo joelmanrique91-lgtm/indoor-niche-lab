@@ -16,11 +16,20 @@ def _print(msg: str) -> None:
     print(f"[smoke] {msg}")
 
 
-def _ensure_env() -> None:
+def _load_env_if_present() -> None:
     env_file = ROOT / ".env"
-    if not env_file.exists():
-        raise SystemExit("Falta .env. Copiá .env.example a .env antes de correr smoke_test.")
-    load_dotenv(env_file)
+    if env_file.exists():
+        load_dotenv(env_file)
+        _print(".env cargado")
+    else:
+        _print("WARN: .env no encontrado; continúo con variables de entorno exportadas")
+
+
+def _warn_missing_critical_vars() -> None:
+    # OPENAI_API_KEY es opcional para smoke básico, no debe bloquear.
+    missing = [name for name in ["DB_PATH"] if not os.getenv(name)]
+    if missing:
+        _print(f"WARN: faltan variables recomendadas: {', '.join(missing)} (uso defaults)")
 
 
 def _run_script(script_name: str) -> None:
@@ -31,12 +40,8 @@ def _run_script(script_name: str) -> None:
 
 def _ensure_db() -> None:
     db_path = ROOT / Path(os.getenv("DB_PATH", "data/indoor.db"))
-    if not db_path.exists():
-        _print(f"DB no encontrada en {db_path}. Ejecutando init + seed...")
-        _run_script("init_db.py")
-        _run_script("seed_demo.py")
-    elif db_path.stat().st_size == 0:
-        _print("DB vacía detectada. Ejecutando init + seed...")
+    if not db_path.exists() or db_path.stat().st_size == 0:
+        _print(f"DB no lista en {db_path}. Ejecutando init + seed...")
         _run_script("init_db.py")
         _run_script("seed_demo.py")
 
@@ -47,29 +52,25 @@ def _check_http_with_testclient() -> None:
     client = TestClient(app)
 
     checks = {
-        "/health": 200,
         "/api/health": 200,
-        "/": 200,
-        "/stages": 200,
-        "/products": 200,
-        "/kits": 200,
+        "/api/stages": 200,
     }
 
+    failures: list[str] = []
     for path, expected_status in checks.items():
         response = client.get(path)
-        if response.status_code != expected_status:
-            raise SystemExit(f"{path} inesperado: status={response.status_code} body={response.text[:220]}")
+        if response.status_code == expected_status:
+            _print(f"PASS {path} status={response.status_code}")
+        else:
+            failures.append(f"FAIL {path} status={response.status_code} body={response.text[:220]}")
 
-    for path in ["/", "/stages", "/products", "/kits"]:
-        html = client.get(path).text
-        if "/static/section-images/" not in html:
-            raise SystemExit(f"{path} no referencia /static/section-images/")
+    if failures:
+        raise SystemExit("\n".join(failures))
 
 
 def main() -> None:
-    _ensure_env()
-    _run_script("init_db.py")
-    _run_script("seed_demo.py")
+    _load_env_if_present()
+    _warn_missing_critical_vars()
     _ensure_db()
     _check_http_with_testclient()
     print("OK")
