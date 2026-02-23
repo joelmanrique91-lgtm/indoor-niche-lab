@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ product.name }}</h1>
+<picture>
+  {% if image_variants.webp %}<source srcset="{{ url_for('static', path=image_variants.webp) }}" type="image/webp">{% endif %}
+  <img src="{{ url_for('static', path=image_variants.fallback) }}" alt="{{ product.name }}" loading="lazy" width="960" height="380">
+</picture>
+<p><strong>Categoría:</strong> {{ product.category }}</p>
+<p><strong>Precio:</strong> USD {{ '%.2f'|format(product.price) }}</p>
+<p><a href="/products">← Volver a productos</a></p>
+{% endblock %}

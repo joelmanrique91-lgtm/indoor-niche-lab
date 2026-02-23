@@ -1,30 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Productos recomendados</h1>
-<img class="catalog-product-image" src="{{ url_for('static', path=hero_path) }}" alt="Vista general de productos" loading="lazy" decoding="async" width="960" height="240">
+<picture>
+  {% if hero_variants.webp %}<source srcset="{{ url_for('static', path=hero_variants.webp) }}" type="image/webp">{% endif %}
+  <img class="catalog-product-image" src="{{ url_for('static', path=hero_variants.fallback) }}" alt="Vista general de productos" loading="lazy" decoding="async" width="960" height="240">
+</picture>
 
 <div class="grid">
   {% for p in products %}
   {% set has_real_url = p.affiliate_url and ('example.com' not in p.affiliate_url) %}
   <article class="card product-list-card">
-    <img
-      class="catalog-product-image"
-      src="{{ url_for('static', path=p.image_path) }}"
-      alt="Foto del producto {{ p.name }} sobre fondo neutro"
-      loading="lazy"
-      decoding="async"
-      width="560"
-      height="220"
-    >
+    <picture>
+      {% if p.image_variants.webp %}<source srcset="{{ url_for('static', path=p.image_variants.webp) }}" type="image/webp">{% endif %}
+      <img class="catalog-product-image" src="{{ url_for('static', path=p.image_variants.fallback) }}" alt="{{ p.name }}" loading="lazy" decoding="async" width="560" height="220">
+    </picture>
     <h2>{{ p.name }}</h2>
     <p><strong>Categoría:</strong> {{ p.category }}</p>
     <p><strong>Precio:</strong> USD {{ '%.2f'|format(p.price) }}</p>
     <p><strong>Tipo:</strong> {{ 'Interno' if p.internal_product else 'Afiliado' }} {% if not p.internal_product %}<span class="affiliate-badge">Afiliado</span>{% endif %}</p>
+    <a class="btn" href="/products/{{ p.id }}">Ver detalle</a>
     {% if has_real_url %}
-      <a class="btn btn-secondary-action" href="{{ p.affiliate_url }}" target="_blank" rel="noopener noreferrer">Ver producto</a>
-    {% else %}
-      <button class="btn btn-disabled" type="button" disabled title="Próximamente" aria-disabled="true">Ver producto</button>
-      <!-- TODO(dev): Configurar affiliate_url real para reemplazar placeholder en productos -->
+      <a class="btn btn-secondary-action" href="{{ p.affiliate_url }}" target="_blank" rel="noopener noreferrer">Comprar</a>
     {% endif %}
   </article>
   {% else %}

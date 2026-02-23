@@ -1,14 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Etapas del cultivo</h1>
-<img class="stage-banner" src="{{ url_for('static', path=hero_path) }}" alt="Vista general de etapas" loading="lazy">
+<img class="stage-banner" src="{{ url_for('static', path=hero_path) }}" alt="Vista general de etapas" loading="lazy" width="1200" height="320">
 
 <div class="grid">
   {% for stage in stages %}
   <article class="card stage-item-card">
     <div class="stage-list-gallery">
-      <img class="stage-list-image" src="{{ url_for('static', path=stage.images.img1_path) }}" alt="Cabecera 1 de {{ stage.name }}" loading="lazy">
-      <img class="stage-list-image" src="{{ url_for('static', path=stage.images.img2_path) }}" alt="Cabecera 2 de {{ stage.name }}" loading="lazy">
+      {% set v1 = stage.image_variants.img1_path %}
+      <picture>
+        {% if v1.webp %}<source srcset="{{ url_for('static', path=v1.webp) }}" type="image/webp">{% endif %}
+        <img class="stage-list-image" src="{{ url_for('static', path=v1.fallback) }}" alt="Imagen de la etapa {{ stage.name }}" loading="lazy" width="560" height="220">
+      </picture>
+      {% set v2 = stage.image_variants.img2_path %}
+      <picture>
+        {% if v2.webp %}<source srcset="{{ url_for('static', path=v2.webp) }}" type="image/webp">{% endif %}
+        <img class="stage-list-image" src="{{ url_for('static', path=v2.fallback) }}" alt="Detalle complementario de la etapa {{ stage.name }}" loading="lazy" width="560" height="220">
+      </picture>
     </div>
     <div class="stage-item-head">
       <h2>{{ stage.order_index }}. {{ stage.name }}</h2>

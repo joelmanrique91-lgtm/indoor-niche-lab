@@ -152,18 +152,36 @@ def list_products() -> list[Product]:
             price=row["price"],
             affiliate_url=row["affiliate_url"],
             internal_product=row["internal_product"],
+            image=row["image"],
         )
         for row in rows
     ]
 
 
+
+def get_product(product_id: int) -> Product | None:
+    _ensure_ready()
+    with get_conn() as conn:
+        row = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+    if not row:
+        return None
+    return Product(
+        id=row["id"],
+        name=row["name"],
+        category=row["category"],
+        price=row["price"],
+        affiliate_url=row["affiliate_url"],
+        internal_product=row["internal_product"],
+        image=row["image"],
+    )
+
 def create_product(product: Product) -> None:
     _ensure_ready()
     with get_conn() as conn:
         conn.execute(
-            """INSERT INTO products(name, category, price, affiliate_url, internal_product)
-            VALUES (?, ?, ?, ?, ?)""",
-            (product.name, product.category, product.price, product.affiliate_url, product.internal_product),
+            """INSERT INTO products(name, category, price, affiliate_url, internal_product, image)
+            VALUES (?, ?, ?, ?, ?, ?)""",
+            (product.name, product.category, product.price, product.affiliate_url, product.internal_product, product.image),
         )
 
 

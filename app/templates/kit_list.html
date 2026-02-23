@@ -1,17 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Kits</h1>
-<img class="kit-hero-image" src="{{ url_for('static', path=hero_path) }}" alt="Vista general de kits" loading="lazy">
+<picture>
+  {% if hero_variants.webp %}<source srcset="{{ url_for('static', path=hero_variants.webp) }}" type="image/webp">{% endif %}
+  <img class="kit-hero-image" src="{{ url_for('static', path=hero_variants.fallback) }}" alt="Vista general de kits" loading="lazy" width="1200" height="320">
+</picture>
 
 <div class="grid">
   {% for kit in kits %}
   <article class="card kit-card">
-    <img
-      class="kit-hero-image"
-      src="{{ url_for('static', path=kit.image_path) }}"
-      alt="Kit completo {{ kit.name }} en entorno real con iluminación natural"
-      loading="lazy"
-    >
+    <picture>
+      {% if kit.image_variants.webp %}<source srcset="{{ url_for('static', path=kit.image_variants.webp) }}" type="image/webp">{% endif %}
+      <img class="kit-hero-image" src="{{ url_for('static', path=kit.image_variants.fallback) }}" alt="Imagen principal del {{ kit.name }}" loading="lazy" width="560" height="220">
+    </picture>
     <h2>{{ kit.name }}</h2>
     <p>{{ kit.description }}</p>
     <p><strong>Precio:</strong> USD {{ '%.2f'|format(kit.price) }}</p>
@@ -21,12 +22,10 @@
       <li>{{ c }}</li>
       {% endfor %}
     </ul>
-    <img
-      class="kit-harvest-image"
-      src="{{ url_for('static', path=kit.result_image_path) }}"
-      alt="Resultado final de cosecha del {{ kit.name }}"
-      loading="lazy"
-    >
+    <picture>
+      {% if kit.result_image_variants.webp %}<source srcset="{{ url_for('static', path=kit.result_image_variants.webp) }}" type="image/webp">{% endif %}
+      <img class="kit-harvest-image" src="{{ url_for('static', path=kit.result_image_variants.fallback) }}" alt="Resultado de cultivo del {{ kit.name }}" loading="lazy" width="560" height="220">
+    </picture>
   </article>
   {% else %}
   <p>No hay kits disponibles.</p>

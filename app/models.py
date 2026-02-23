@@ -29,6 +29,7 @@ class Product(BaseModel):
     price: float
     affiliate_url: str
     internal_product: int = 0
+    image: str | None = None
 
 
 class Kit(BaseModel):
